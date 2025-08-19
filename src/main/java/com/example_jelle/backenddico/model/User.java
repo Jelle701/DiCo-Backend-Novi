@@ -3,7 +3,7 @@ package com.example_jelle.backenddico.model;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList; // TOEGEVOEGD
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -33,7 +33,7 @@ public class User {
     private LocalDateTime verificationCodeExpires;
 
     @Column(unique = true)
-    private String accessCode;
+    private String hashedAccessCode; // Renamed from accessCode
 
     @Embedded
     private UserFlags flags = new UserFlags();
@@ -42,10 +42,10 @@ public class User {
     private UserProfile userProfile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<UserDevice> devices = new ArrayList<>(); // FIX: Initialiseer de lijst
+    private List<UserDevice> devices = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>(); // FIX: Initialiseer de lijst
+    private List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
 
     // Getters and Setters
     public Long getId() { return id; }
@@ -81,8 +81,8 @@ public class User {
     public LocalDateTime getVerificationCodeExpires() { return verificationCodeExpires; }
     public void setVerificationCodeExpires(LocalDateTime verificationCodeExpires) { this.verificationCodeExpires = verificationCodeExpires; }
 
-    public String getAccessCode() { return accessCode; }
-    public void setAccessCode(String accessCode) { this.accessCode = accessCode; }
+    public String getHashedAccessCode() { return hashedAccessCode; } // Renamed from getAccessCode
+    public void setHashedAccessCode(String hashedAccessCode) { this.hashedAccessCode = hashedAccessCode; } // Renamed from setAccessCode
 
     public UserFlags getFlags() { return flags; }
     public void setFlags(UserFlags flags) { this.flags = flags; }
@@ -101,7 +101,6 @@ public class User {
         this.glucoseMeasurements = glucoseMeasurements;
     }
 
-    // TOEGEVOEGD: Helper-methode voor een robuuste, bidirectionele relatie
     public void addGlucoseMeasurement(GlucoseMeasurement measurement) {
         this.glucoseMeasurements.add(measurement);
         measurement.setUser(this);

@@ -1,6 +1,7 @@
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.exceptions.InvalidTokenException;
+import com.example_jelle.backenddico.exceptions.RecordNotFoundException;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.payload.request.LoginRequest;
 import com.example_jelle.backenddico.payload.request.RegisterRequest;
@@ -79,7 +80,8 @@ public class AuthController {
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyEmail(@Valid @RequestBody VerifyEmailRequest verifyRequest) {
         try {
-            User user = userService.verifyUser(verifyRequest.getEmail(), verifyRequest.getToken());
+            User user = userService.verifyUser(verifyRequest.getEmail(), verifyRequest.getToken())
+                    .orElseThrow(() -> new RecordNotFoundException("Verification failed: user not found or token is invalid."));
 
             UserDetails userDetails = new CustomUserDetails(user);
             final String jwt = jwtUtil.generateToken(userDetails);
@@ -91,7 +93,7 @@ public class AuthController {
                     user.getEmail(),
                     user.getRole()
             ));
-        } catch (InvalidTokenException e) {
+        } catch (InvalidTokenException | RecordNotFoundException e) {
             return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
         }
     }

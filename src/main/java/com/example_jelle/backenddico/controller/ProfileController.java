@@ -1,7 +1,8 @@
 package com.example_jelle.backenddico.controller;
 
-import com.example_jelle.backenddico.dto.FullUserProfileDto;
+import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
+import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +19,6 @@ public class ProfileController {
         this.userService = userService;
     }
 
-    /**
-     * Haalt het volledige profiel op van de huidige, ingelogde gebruiker.
-     * @param authentication Wordt automatisch gevuld door Spring Security.
-     * @return Een ResponseEntity met de volledige profielgegevens.
-     */
     @GetMapping("/me")
     public ResponseEntity<FullUserProfileDto> getMyProfile(Authentication authentication) {
         String userEmail = authentication.getName();
@@ -30,17 +26,16 @@ public class ProfileController {
         return ResponseEntity.ok(userProfile);
     }
 
-    /**
-     * Slaat de onboarding-gegevens van een gebruiker op.
-     * @return Een ResponseEntity met de volledige, bijgewerkte profielgegevens voor consistentie.
-     */
     @PutMapping("/details")
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(
             Authentication authentication,
             @Valid @RequestBody OnboardingRequestDto onboardingData) {
 
         String userEmail = authentication.getName();
-        FullUserProfileDto updatedUser = userService.saveProfileDetails(userEmail, onboardingData);
-        return ResponseEntity.ok(updatedUser);
+        // saveProfileDetails returns a User object
+        userService.saveProfileDetails(userEmail, onboardingData);
+        // We fetch the updated profile to return the DTO
+        FullUserProfileDto updatedProfile = userService.getFullUserProfile(userEmail);
+        return ResponseEntity.ok(updatedProfile);
     }
 }

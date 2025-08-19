@@ -1,14 +1,15 @@
 package com.example_jelle.backenddico.controller;
 
+import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -17,18 +18,9 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/generate-access-code")
-    public ResponseEntity<?> generateAccessCode(Authentication authentication) {
-        String username = authentication.getName();
-        String accessCode = userService.generateAccessCode(username);
-        return ResponseEntity.ok(Map.of("accessCode", accessCode));
-    }
-
-    @GetMapping("/access-code")
-    public ResponseEntity<?> getAccessCode(Authentication authentication) {
-        String username = authentication.getName();
-        return userService.getAccessCode(username)
-                .map(code -> ResponseEntity.ok(Map.of("accessCode", code)))
-                .orElse(ResponseEntity.ok(Map.of("accessCode", (Object) null)));
+    @GetMapping("/{username}/profile")
+    public ResponseEntity<FullUserProfileDto> getFullUserProfile(@PathVariable String username) {
+        FullUserProfileDto userProfile = userService.getFullUserProfile(username);
+        return ResponseEntity.ok(userProfile);
     }
 }

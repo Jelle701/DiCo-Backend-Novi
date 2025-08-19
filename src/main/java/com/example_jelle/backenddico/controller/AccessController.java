@@ -1,13 +1,13 @@
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.AccessCodeRequest;
-import com.example_jelle.backenddico.model.User;
-import com.example_jelle.backenddico.security.JwtUtil;
 import com.example_jelle.backenddico.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,24 +15,19 @@ import java.util.Map;
 public class AccessController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
-    public AccessController(UserService userService, JwtUtil jwtUtil) {
+    public AccessController(UserService userService) {
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping("/grant")
     public ResponseEntity<?> grantAccess(@RequestBody AccessCodeRequest request) {
-        return userService.findByAccessCode(request.getAccessCode())
-                .map(this::createDelegatedToken)
-                .map(token -> ResponseEntity.ok(Map.of("token", token)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    private String createDelegatedToken(User user) {
-        long expirationMillis = 8 * 60 * 60 * 1000; // 8 uur
-        List<String> authorities = List.of("read:dashboard");
-        return jwtUtil.generateToken(user.getUsername(), authorities, expirationMillis);
+        try {
+            String delegatedToken = userService.grantDelegatedAccessToken(request.getAccessCode());
+            return ResponseEntity.ok(Map.of("token", delegatedToken));
+        } catch (RuntimeException e) {
+            // Catches RecordNotFoundException from the service layer
+            return ResponseEntity.notFound().build();
+        }
     }
 }

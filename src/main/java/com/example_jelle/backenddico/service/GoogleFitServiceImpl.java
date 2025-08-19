@@ -5,8 +5,10 @@ import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.GoogleFitTokenRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -54,7 +56,13 @@ public class GoogleFitServiceImpl implements GoogleFitService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-        ResponseEntity<Map> response = restTemplate.postForEntity(TOKEN_URL, request, Map.class);
+        // Use exchange with ParameterizedTypeReference to handle generic types safely
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                TOKEN_URL,
+                HttpMethod.POST,
+                request,
+                new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
 
         if (response.getStatusCode().is2xxSuccessful()) {
             Map<String, Object> responseBody = response.getBody();

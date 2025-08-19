@@ -2,49 +2,73 @@ package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.UserRepository;
+import com.example_jelle.backenddico.requests.RegisterRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    @Transactional
-    public String generateAccessCode(String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
 
-        String accessCode = generateUniqueAccessCode();
-        user.setAccessCode(accessCode);
+    @Override
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User updateUser(Long id, User user) {
+        if (userRepository.existsById(id)) {
+            user.setId(id);
+            return userRepository.save(user);
+        }
+        return null;
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+
+    @Override
+    public String register(RegisterRequest registerRequest) {
+        Optional<User> userOptional = userRepository.findByUsername(registerRequest.getUsername());
+        if (userOptional.isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        User user = new User();
+        user.setUsername(registerRequest.getUsername());
+        user.setEmail(registerRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        user.setRole("USER");
+
         userRepository.save(user);
-        return accessCode;
+
+        return "User registered successfully";
     }
 
     @Override
-    public Optional<String> getAccessCode(String username) {
-        return userRepository.findByUsername(username)
-                .map(User::getAccessCode);
-    }
-
-    @Override
-    public Optional<User> findByAccessCode(String accessCode) {
-        return userRepository.findByAccessCode(accessCode);
-    }
-
-    private String generateUniqueAccessCode() {
-        String code;
-        do {
-            code = UUID.randomUUID().toString().substring(0, 8).toUpperCase(); // Korte, unieke code
-        } while (userRepository.findByAccessCode(code).isPresent()); // Zorg dat de code uniek is
-        return code;
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 }
