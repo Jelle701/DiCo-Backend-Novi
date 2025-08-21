@@ -1,7 +1,7 @@
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
-import com.example_jelle.backenddico.exceptions.UserNotFoundException;
+import com.example_jelle.backenddico.exception.UserNotFoundException;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;

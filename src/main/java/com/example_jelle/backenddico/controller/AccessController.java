@@ -1,33 +1,25 @@
 package com.example_jelle.backenddico.controller;
 
-import com.example_jelle.backenddico.dto.AccessCodeRequest;
-import com.example_jelle.backenddico.service.UserService;
+import com.example_jelle.backenddico.dto.access.GrantAccessRequestDto;
+import com.example_jelle.backenddico.dto.access.GrantAccessResponseDto;
+import com.example_jelle.backenddico.service.AccessService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/access")
 public class AccessController {
 
-    private final UserService userService;
+    private final AccessService accessService;
 
-    public AccessController(UserService userService) {
-        this.userService = userService;
+    public AccessController(AccessService accessService) {
+        this.accessService = accessService;
     }
 
     @PostMapping("/grant")
-    public ResponseEntity<?> grantAccess(@RequestBody AccessCodeRequest request) {
-        try {
-            String delegatedToken = userService.grantDelegatedAccessToken(request.getAccessCode());
-            return ResponseEntity.ok(Map.of("token", delegatedToken));
-        } catch (RuntimeException e) {
-            // Catches RecordNotFoundException from the service layer
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<GrantAccessResponseDto> grantAccess(@Valid @RequestBody GrantAccessRequestDto request) {
+        GrantAccessResponseDto response = accessService.grantAccess(request.getAccessCode());
+        return ResponseEntity.ok(response);
     }
 }

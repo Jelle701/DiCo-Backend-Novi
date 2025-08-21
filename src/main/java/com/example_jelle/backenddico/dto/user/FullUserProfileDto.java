@@ -1,26 +1,36 @@
 package com.example_jelle.backenddico.dto.user;
 
-import com.example_jelle.backenddico.model.enums.Gender;
-import java.time.LocalDate;
+import java.util.Set;
 
 public class FullUserProfileDto {
 
     private String username;
-    private String firstName;
-    private String lastName;
-    private LocalDate dob;
-    private Gender gender; // Gebruikt nu de Enum
-    private Double length;
-    private Double weight;
-    private String diabetesType;
+    private String email;
+    private Set<String> roles;
 
-    // Setters
-    public void setUsername(String username) { this.username = username; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setDob(LocalDate dob) { this.dob = dob; }
-    public void setGender(Gender gender) { this.gender = gender; }
-    public void setLength(Double length) { this.length = length; }
-    public void setWeight(Double weight) { this.weight = weight; }
-    public void setDiabetesType(String diabetesType) { this.diabetesType = diabetesType; }
+    // Getters and setters
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Set<String> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
 }

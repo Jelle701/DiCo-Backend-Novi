@@ -4,7 +4,7 @@ import com.example_jelle.backenddico.dto.health.DailyStepsDto;
 import com.example_jelle.backenddico.dto.health.DataPointDto;
 import com.example_jelle.backenddico.dto.health.HealthDataRequest;
 import com.example_jelle.backenddico.dto.health.HealthDataResponse;
-import com.example_jelle.backenddico.exceptions.UnauthorizedException;
+import com.example_jelle.backenddico.exception.UnauthorizedException;
 import com.example_jelle.backenddico.model.HealthData;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.HealthDataRepository;

@@ -79,7 +79,12 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String generateDelegatedAccessToken(String username) {
+    /**
+     * Generates a delegated token for a specific user (patient) with limited scope and expiration.
+     * @param username The username of the patient for whom the token is delegated.
+     * @return A JWT with 'read:dashboard' scope, valid for 8 hours.
+     */
+    public String generateDelegatedToken(String username) {
         List<String> scope = List.of("read:dashboard");
         return generateToken(username, scope, EIGHT_HOURS_IN_MILLIS);
     }

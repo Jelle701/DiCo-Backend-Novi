@@ -23,15 +23,21 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userOptional = userService.findByUsername(username);
-        if (userOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        }
-        User user = userOptional.get();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
+        // FIXED: Convert the Role enum to a Spring Security authority string (e.g., "ROLE_PATIENT")
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(user.getRole()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), authorities);
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                user.isEnabled(),
+                true,
+                true,
+                true,
+                authorities
+        );
     }
 }

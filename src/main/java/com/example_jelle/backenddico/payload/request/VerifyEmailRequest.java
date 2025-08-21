@@ -2,20 +2,29 @@ package com.example_jelle.backenddico.payload.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public class VerifyEmailRequest {
-    @NotBlank
-    @Email
+
+    @NotBlank(message = "Email is required.")
+    @Email(message = "Email should be valid.")
     private String email;
 
-    @NotBlank
-    @Size(min = 6, max = 6, message = "Verificatiecode moet 6 tekens lang zijn")
-    private String token; // De 6-cijferige code
+    @NotBlank(message = "Verification code is required.")
+    private String code;
 
-    // Getters en Setters
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
 }

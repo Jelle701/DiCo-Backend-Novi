@@ -1,4 +1,4 @@
-package com.example_jelle.backenddico.exceptions;
+package com.example_jelle.backenddico.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

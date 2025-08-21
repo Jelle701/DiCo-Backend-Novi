@@ -1,4 +1,4 @@
-package com.example_jelle.backenddico.exceptions;
+package com.example_jelle.backenddico.exception;
 
 import com.example_jelle.backenddico.payload.response.MessageResponse;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package com.example_jelle.backenddico.dto;
+package com.example_jelle.backenddico.dto.patient;
 
 public class AccessCodeDto {
     private String accessCode;

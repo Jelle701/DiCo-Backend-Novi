@@ -3,10 +3,7 @@ package com.example_jelle.backenddico.controller;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.service.UserService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/users")

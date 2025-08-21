@@ -1,4 +1,4 @@
-package com.example_jelle.backenddico.exceptions;
+package com.example_jelle.backenddico.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
