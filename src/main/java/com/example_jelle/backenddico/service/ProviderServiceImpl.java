@@ -14,6 +14,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This service implements the logic for provider-related actions.
+ * It handles linking a provider to a patient and retrieving the list of linked patients.
+ */
 @Service
 public class ProviderServiceImpl implements ProviderService {
 
@@ -27,6 +31,15 @@ public class ProviderServiceImpl implements ProviderService {
         this.userService = userService;
     }
 
+    /**
+     * Links a provider to a patient using a valid access code.
+     * It finds the provider, validates the access code, finds the patient,
+     * and establishes the link between them.
+     * @param providerUsername The username of the provider.
+     * @param accessCode The access code provided by the patient.
+     * @throws UserNotFoundException if the provider is not found.
+     * @throws InvalidAccessException if the access code is invalid or expired.
+     */
     @Override
     @Transactional
     public void linkPatient(String providerUsername, String accessCode) {
@@ -44,6 +57,13 @@ public class ProviderServiceImpl implements ProviderService {
         userRepository.save(provider);
     }
 
+    /**
+     * Retrieves a list of all patients linked to a specific provider.
+     * It finds the provider and then maps their linked patient entities to DTOs.
+     * @param providerUsername The username of the provider.
+     * @return A list of FullUserProfileDto objects for the linked patients.
+     * @throws UserNotFoundException if the provider is not found.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<FullUserProfileDto> getLinkedPatients(String providerUsername) {

@@ -1,13 +1,37 @@
-// Bestandslocatie: src/main/java/com/example_jelle/backenddico/payload/response/JwtResponse.java
 package com.example_jelle.backenddico.payload.response;
 
+/**
+ * This class is a Data Transfer Object (DTO) for sending a response after successful authentication.
+ * It contains the JSON Web Token (JWT) along with essential user details and status information.
+ */
 public class JwtResponse {
+    /**
+     * The JWT that the client should use for authenticating subsequent requests.
+     */
     private String token;
+    /**
+     * The unique ID of the authenticated user.
+     */
     private Long id;
+    /**
+     * The username of the authenticated user.
+     */
     private String username;
+    /**
+     * The email address of the authenticated user.
+     */
     private String email;
+    /**
+     * The role of the authenticated user (e.g., "PATIENT", "PROVIDER").
+     */
     private String role;
+    /**
+     * A flag indicating whether the user has completed the onboarding process.
+     */
     private boolean onboardingCompleted;
+    /**
+     * An optional message to be sent to the client.
+     */
     private String message;
 
     public JwtResponse(String token, Long id, String username, String email, String role) {
@@ -16,8 +40,8 @@ public class JwtResponse {
         this.username = username;
         this.email = email;
         this.role = role;
-        this.onboardingCompleted = true; // Standaardwaarde
-        this.message = null; // Standaardwaarde
+        this.onboardingCompleted = true; // Default value
+        this.message = null; // Default value
     }
 
     public JwtResponse(String token, Long id, String username, String email, String role, boolean onboardingCompleted, String message) {
@@ -30,7 +54,7 @@ public class JwtResponse {
         this.message = message;
     }
 
-    // Getters en Setters
+    // Getters and Setters
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
     public Long getId() { return id; }

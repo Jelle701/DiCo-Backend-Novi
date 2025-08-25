@@ -4,22 +4,26 @@ import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
 
 import java.util.List;
 
+/**
+ * This interface defines the contract for managing glucose measurements.
+ * It provides methods for adding new measurements and retrieving recent ones.
+ */
 public interface GlucoseMeasurementService {
 
     /**
-     * Voegt een nieuwe glucosemeting toe voor de opgegeven gebruiker.
+     * Adds a new glucose measurement for the specified user.
      *
-     * @param userEmail De email van de ingelogde gebruiker.
-     * @param measurementDto De DTO met de meetgegevens.
-     * @return De opgeslagen meting als DTO.
+     * @param userEmail The email of the logged-in user.
+     * @param measurementDto The DTO containing the measurement data.
+     * @return The saved measurement as a DTO.
      */
     GlucoseMeasurementDto addMeasurement(String userEmail, GlucoseMeasurementDto measurementDto);
 
     /**
-     * Haalt de glucosemetingen van de laatste 90 dagen op voor de opgegeven gebruiker.
+     * Retrieves the glucose measurements from the last 90 days for the specified user.
      *
-     * @param userEmail De email van de ingelogde gebruiker.
-     * @return Een lijst met recente metingen.
+     * @param userEmail The email of the logged-in user.
+     * @return A list of recent measurements.
      */
     List<GlucoseMeasurementDto> getRecentMeasurements(String userEmail);
 }

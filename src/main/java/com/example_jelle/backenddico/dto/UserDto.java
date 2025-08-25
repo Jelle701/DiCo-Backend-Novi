@@ -1,5 +1,9 @@
 package com.example_jelle.backenddico.dto;
 
+/**
+ * This class is a Data Transfer Object (DTO) for basic user information.
+ * It is used to transfer user data between different layers of the application.
+ */
 public class UserDto {
     private Long id;
     private String username;

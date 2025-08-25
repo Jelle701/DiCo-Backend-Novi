@@ -6,30 +6,46 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 /**
- * DTO voor de gebruikersvoorkeuren. Bevat validatieregels voor elk veld.
- * Gebruikt Double voor numerieke waarden om getalvalidatie mogelijk te maken.
+ * This class is a Data Transfer Object (DTO) for user preferences, typically collected during onboarding.
+ * It includes validation rules for each field to ensure data integrity.
+ * Double is used for numeric values to facilitate numeric validation.
  */
 public class PreferencesDto {
 
-    @NotBlank(message = "Systeem (system) mag niet leeg zijn.")
-    private String system; // "metric" of "imperial"
+    /**
+     * The measurement system preference ("metric" or "imperial"). Cannot be blank.
+     */
+    @NotBlank(message = "System cannot be blank.")
+    private String system;
 
-    @NotNull(message = "Geslacht (gender) is verplicht.")
+    /**
+     * The user's gender. This field is required.
+     */
+    @NotNull(message = "Gender is required.")
     private Gender gender;
 
-    @NotNull(message = "Gewicht (weight) is verplicht.")
-    @Positive(message = "Gewicht (weight) moet een positief getal zijn.")
+    /**
+     * The user's weight. This field is required and must be a positive number.
+     */
+    @NotNull(message = "Weight is required.")
+    @Positive(message = "Weight must be a positive number.")
     private Double weight;
 
-    @NotNull(message = "Lengte (height) is verplicht.")
-    @Positive(message = "Lengte (height) moet een positief getal zijn.")
+    /**
+     * The user's height. This field is required and must be a positive number.
+     */
+    @NotNull(message = "Height is required.")
+    @Positive(message = "Height must be a positive number.")
     private Double height;
 
-    @NotNull(message = "BMI is verplicht.")
-    @Positive(message = "BMI moet een positief getal zijn.")
+    /**
+     * The user's Body Mass Index (BMI). This field is required and must be a positive number.
+     */
+    @NotNull(message = "BMI is required.")
+    @Positive(message = "BMI must be a positive number.")
     private Double bmi;
 
-    // Getters en Setters
+    // Getters and Setters
     public String getSystem() {
         return system;
     }

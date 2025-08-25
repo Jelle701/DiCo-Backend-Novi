@@ -2,24 +2,26 @@ package com.example_jelle.backenddico.dto;
 
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
 import jakarta.validation.constraints.NotNull;
-// import jakarta.validation.constraints.PastOrPresent; // VERWIJDERD
 import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
 
+/**
+ * This class is a Data Transfer Object (DTO) for glucose measurements.
+ * It is used for creating and retrieving glucose measurement data and includes validation constraints.
+ */
 public class GlucoseMeasurementDto {
 
     private Long id;
 
-    @NotNull(message = "Glucosewaarde is verplicht.")
-    @Positive(message = "Glucosewaarde moet een positief getal zijn.")
+    @NotNull(message = "Glucose value is required.")
+    @Positive(message = "Glucose value must be a positive number.")
     private Double value;
 
-    @NotNull(message = "Tijdstip is verplicht.")
-    // @PastOrPresent(message = "Tijdstip kan niet in de toekomst liggen.") // VERWIJDERD
+    @NotNull(message = "Timestamp is required.")
     private LocalDateTime timestamp;
 
-    // Getters en Setters
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Double getValue() { return value; }
@@ -28,7 +30,9 @@ public class GlucoseMeasurementDto {
     public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
 
     /**
-     * Factory-methode om een DTO te maken van een Entity.
+     * A static factory method to create a DTO from a GlucoseMeasurement entity.
+     * @param measurement The entity to convert.
+     * @return A new GlucoseMeasurementDto populated with the entity's data.
      */
     public static GlucoseMeasurementDto fromEntity(GlucoseMeasurement measurement) {
         GlucoseMeasurementDto dto = new GlucoseMeasurementDto();
@@ -39,7 +43,8 @@ public class GlucoseMeasurementDto {
     }
 
     /**
-     * Methode om een Entity te maken van deze DTO.
+     * Converts this DTO to a GlucoseMeasurement entity.
+     * @return A new GlucoseMeasurement entity populated with this DTO's data.
      */
     public GlucoseMeasurement toEntity() {
         GlucoseMeasurement measurement = new GlucoseMeasurement();

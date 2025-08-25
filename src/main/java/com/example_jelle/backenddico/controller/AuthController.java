@@ -18,6 +18,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * This controller handles authentication-related endpoints, such as user login, registration, and email verification.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -35,6 +38,12 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    /**
+     * Authenticates a user with username and password, returning a JWT upon success.
+     * @param authenticationRequest The request body containing the user's credentials.
+     * @return A ResponseEntity containing the JWT in an AuthenticationResponse.
+     * @throws Exception if authentication fails.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
         // FIXED: Convert username to lower case to ensure case-insensitivity
@@ -59,12 +68,22 @@ public class AuthController {
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
     }
 
+    /**
+     * Registers a new user.
+     * @param registerRequest The request body containing user registration details.
+     * @return A ResponseEntity with a success message.
+     */
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         userService.register(registerRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully! Please check your console for the verification code."));
     }
 
+    /**
+     * Verifies a user's email address using a verification code.
+     * @param verifyRequest The request body containing the verification token.
+     * @return A ResponseEntity with a success message.
+     */
     @PostMapping("/verify-email")
     public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyRequest verifyRequest) {
         userService.verifyUser(verifyRequest);

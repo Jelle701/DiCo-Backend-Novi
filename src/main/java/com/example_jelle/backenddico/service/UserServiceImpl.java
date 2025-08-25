@@ -29,6 +29,10 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * This class implements the UserService interface and contains the business logic for user management.
+ * It handles user registration, verification, profile updates, and access code generation.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -45,6 +49,11 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a new user. Checks for existing email, hashes the password, sets a default role,
+     * and generates a verification code.
+     * @param registerRequest The request object containing registration details.
+     */
     @Override
     @Transactional
     public void register(RegisterRequest registerRequest) {
@@ -70,6 +79,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Verifies a user account using a verification token. If the token is valid and not expired,
+     * the user account is enabled.
+     * @param verifyRequest The request object containing the verification token.
+     */
     @Override
     @Transactional
     public void verifyUser(VerifyRequest verifyRequest) {
@@ -92,6 +106,11 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Saves or updates a user's profile details, such as their role and date of birth.
+     * @param username The username of the user to update.
+     * @param onboardingRequestDto The DTO containing the new profile details.
+     */
     @Override
     @Transactional
     public void saveProfileDetails(String username, OnboardingRequestDto onboardingRequestDto) {
@@ -115,6 +134,11 @@ public class UserServiceImpl implements UserService {
         logger.info("Saved profile details for user: {}", username);
     }
 
+    /**
+     * Retrieves a full user profile DTO for a given username.
+     * @param username The username of the user to retrieve.
+     * @return A FullUserProfileDto containing public user information.
+     */
     @Override
     public FullUserProfileDto getFullUserProfile(String username) {
         User user = userRepository.findByUsername(username)
@@ -126,7 +150,10 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
-    // ... other methods ...
+    /**
+     * Retrieves a list of all users.
+     * @return A list of UserDto objects.
+     */
     @Override
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream()
@@ -134,11 +161,22 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Finds a user by their username.
+     * @param username The username to search for.
+     * @return An Optional containing the User if found, or an empty Optional otherwise.
+     */
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    /**
+     * Generates a unique, time-limited access code for a patient.
+     * This code can be used by guardians or providers to link to the patient.
+     * @param patientEmail The email of the patient for whom to generate the code.
+     * @return The generated access code as a String.
+     */
     @Override
     @Transactional
     public String generateAccessCode(String patientEmail) {
@@ -160,6 +198,11 @@ public class UserServiceImpl implements UserService {
         return code;
     }
 
+    /**
+     * Retrieves the currently active access code for a patient.
+     * @param patientEmail The email of the patient.
+     * @return The active access code, or null if none is found.
+     */
     @Override
     public String getAccessCode(String patientEmail) {
         User user = userRepository.findByUsername(patientEmail)
@@ -170,6 +213,11 @@ public class UserServiceImpl implements UserService {
                 .orElse(null);
     }
 
+    /**
+     * Converts a User entity to a UserDto.
+     * @param user The User entity to convert.
+     * @return The corresponding UserDto.
+     */
     private UserDto fromUser(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());

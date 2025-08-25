@@ -2,6 +2,11 @@ package com.example_jelle.backenddico.dto.user;
 
 import java.util.Set;
 
+/**
+ * This class is a Data Transfer Object (DTO) for a user's full profile information.
+ * It is used to send comprehensive user details, including username, email, and assigned roles,
+ * to the client or between different services.
+ */
 public class FullUserProfileDto {
 
     private String username;

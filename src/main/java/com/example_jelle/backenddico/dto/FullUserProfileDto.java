@@ -2,6 +2,10 @@ package com.example_jelle.backenddico.dto;
 
 import com.example_jelle.backenddico.model.UserProfile;
 
+/**
+ * This class is a Data Transfer Object (DTO) for a user's full profile.
+ * It includes basic user identification (username, email) along with the detailed UserProfile.
+ */
 public class FullUserProfileDto {
     private String username;
     private String email;

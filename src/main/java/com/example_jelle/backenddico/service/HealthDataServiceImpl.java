@@ -17,6 +17,11 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This service implements the logic for saving and retrieving user health data.
+ * It handles different types of health data, such as steps and heart rate,
+ * and provides a summary of recent activity.
+ */
 @Service
 @AllArgsConstructor
 public class HealthDataServiceImpl implements HealthDataService {
@@ -24,6 +29,14 @@ public class HealthDataServiceImpl implements HealthDataService {
     private final UserRepository userRepository;
     private final HealthDataRepository healthDataRepository;
 
+    /**
+     * Saves health data points from a request for a specific user.
+     * It iterates through the data points (e.g., steps, heart rate) in the request
+     * and persists them individually, linked to the user.
+     * @param username The username of the user whose data is being saved.
+     * @param healthDataRequest The request object containing lists of health data points.
+     * @throws UnauthorizedException if the user is not found.
+     */
     @Override
     public void saveHealthData(String username, HealthDataRequest healthDataRequest) {
         User user = userRepository.findByUsername(username)
@@ -52,6 +65,13 @@ public class HealthDataServiceImpl implements HealthDataService {
         }
     }
 
+    /**
+     * Retrieves a summary of health data for a specific user.
+     * This includes a 7-day history of daily steps and the latest recorded heart rate.
+     * @param username The username of the user.
+     * @return A HealthDataResponse DTO containing the summarized data.
+     * @throws UnauthorizedException if the user is not found.
+     */
     @Override
     public HealthDataResponse getHealthDataSummary(String username) {
         User user = userRepository.findByUsername(username)

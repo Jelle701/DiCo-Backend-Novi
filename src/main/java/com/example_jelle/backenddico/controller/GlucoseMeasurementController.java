@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * This controller handles operations related to glucose measurements.
+ * It provides endpoints for adding new measurements and retrieving recent measurements
+ * for the authenticated user. Access is restricted to authenticated users.
+ */
 @RestController
 @RequestMapping("/api/glucose")
 public class GlucoseMeasurementController {
@@ -21,6 +26,13 @@ public class GlucoseMeasurementController {
         this.measurementService = measurementService;
     }
 
+    /**
+     * Adds a new glucose measurement for the authenticated user.
+     * The user must have the 'USER' role.
+     * @param authentication The authentication object for the current user.
+     * @param measurementDto The DTO containing the details of the glucose measurement.
+     * @return A ResponseEntity containing the saved GlucoseMeasurementDto with HTTP status 201 CREATED.
+     */
     @PostMapping
     @PreAuthorize("hasRole('USER')") // FIX: Aangepast van 'ADMIN' naar 'USER'
     public ResponseEntity<GlucoseMeasurementDto> addGlucoseMeasurement(
@@ -33,6 +45,12 @@ public class GlucoseMeasurementController {
         return new ResponseEntity<>(savedDto, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves recent glucose measurements for the authenticated user.
+     * The user must have the 'USER' role.
+     * @param authentication The authentication object for the current user.
+     * @return A ResponseEntity containing a list of recent GlucoseMeasurementDto objects.
+     */
     @GetMapping
     @PreAuthorize("hasRole('USER')") // Consistentie: ook hier de juiste rol vereisen
     public ResponseEntity<List<GlucoseMeasurementDto>> getRecentGlucoseMeasurements(Authentication authentication) {

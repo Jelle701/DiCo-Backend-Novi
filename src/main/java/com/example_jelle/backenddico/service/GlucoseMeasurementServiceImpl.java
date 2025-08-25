@@ -13,6 +13,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * This service implements the logic for managing glucose measurements.
+ * It handles adding new measurements and retrieving recent measurements for a user.
+ */
 @Service
 public class GlucoseMeasurementServiceImpl implements GlucoseMeasurementService {
 
@@ -24,6 +28,15 @@ public class GlucoseMeasurementServiceImpl implements GlucoseMeasurementService 
         this.userRepository = userRepository;
     }
 
+    /**
+     * Adds a new glucose measurement for a specific user.
+     * It finds the user by email, converts the DTO to an entity,
+     * links the measurement to the user, and saves it to the database.
+     *
+     * @param userEmail The email of the user for whom the measurement is added.
+     * @param measurementDto The DTO containing the details of the new measurement.
+     * @return A DTO representing the saved glucose measurement.
+     */
     @Override
     @Transactional
     public GlucoseMeasurementDto addMeasurement(String userEmail, GlucoseMeasurementDto measurementDto) {
@@ -43,6 +56,13 @@ public class GlucoseMeasurementServiceImpl implements GlucoseMeasurementService 
         return GlucoseMeasurementDto.fromEntity(savedMeasurement);
     }
 
+    /**
+     * Retrieves the glucose measurements from the last 90 days for a specific user.
+     * It finds the user by email and queries the repository for measurements after a calculated date.
+     *
+     * @param userEmail The email of the user whose recent measurements are to be retrieved.
+     * @return A list of DTOs representing the recent glucose measurements, sorted by timestamp descending.
+     */
     @Override
     @Transactional(readOnly = true)
     public List<GlucoseMeasurementDto> getRecentMeasurements(String userEmail) {

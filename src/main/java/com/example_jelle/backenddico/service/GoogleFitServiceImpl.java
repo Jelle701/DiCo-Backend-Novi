@@ -20,6 +20,10 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
+/**
+ * This service implements the logic for handling the Google Fit API integration.
+ * It is responsible for exchanging the authorization code for access and refresh tokens and storing them securely.
+ */
 @Service
 public class GoogleFitServiceImpl implements GoogleFitService {
 
@@ -42,6 +46,13 @@ public class GoogleFitServiceImpl implements GoogleFitService {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Exchanges a Google authorization code for access and refresh tokens.
+     * It makes a POST request to Google's token endpoint. Upon success, it retrieves the tokens
+     * and persists them for the currently authenticated user. It handles both new token creation
+     * and updates to existing tokens (e.g., refreshing the access token).
+     * @param code The authorization code received from Google's callback.
+     */
     @Override
     public void exchangeCodeForTokens(String code) {
         HttpHeaders headers = new HttpHeaders();

@@ -7,21 +7,27 @@ import java.time.Instant;
 import java.util.Date;
 
 /**
- * DTO to represent a single entry from a Nightscout-compatible uploader.
- * Field names match the Nightscout API specification.
+ * This class is a Data Transfer Object (DTO) representing a single glucose entry from a Nightscout-compatible source.
+ * The field names are mapped to the JSON properties of the Nightscout API specification.
  */
 public class NightscoutEntryDto {
 
-    // Glucose Value in mg/dL, as sent by most uploaders.
+    /**
+     * The glucose value in mg/dL.
+     */
     @JsonProperty("sgv")
     private int sgv;
 
-    // The timestamp of the reading.
+    /**
+     * The timestamp of the reading, provided as epoch milliseconds from the source.
+     */
     @JsonProperty("date")
     @JsonFormat(shape = JsonFormat.Shape.NUMBER) // Nightscout sends date as epoch milliseconds
     private Date date;
 
-    // The device that created the entry, e.g., "nightscout-librelink-up"
+    /**
+     * The identifier of the device that created the entry (e.g., "nightscout-librelink-up").
+     */
     @JsonProperty("device")
     private String device;
 
@@ -50,7 +56,11 @@ public class NightscoutEntryDto {
         this.device = device;
     }
 
-    // Helper method to convert to an Instant for easier use with LocalDateTime
+    /**
+     * A helper method to convert the Date object to an Instant.
+     * This is useful for working with Java's modern date-time API (java.time).
+     * @return The date as an Instant, or null if the date is not set.
+     */
     public Instant getDateAsInstant() {
         return date != null ? date.toInstant() : null;
     }

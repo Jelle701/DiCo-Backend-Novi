@@ -3,6 +3,10 @@ package com.example_jelle.backenddico.dto.onboarding;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
+/**
+ * This class is a Data Transfer Object (DTO) that aggregates all the information
+ * collected from a user during the onboarding process.
+ */
 public class OnboardingRequestDto {
 
     private double height;
@@ -12,8 +16,12 @@ public class OnboardingRequestDto {
     private String diabetesType;
     private String medication;
 
+    /**
+     * The role selected by the user (e.g., PATIENT, GUARDIAN, PROVIDER).
+     * This field is required.
+     */
     @NotBlank(message = "Role is required.")
-    private String role; // Added role field
+    private String role;
 
     // Getters and Setters
     public double getHeight() {

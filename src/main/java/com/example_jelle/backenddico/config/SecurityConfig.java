@@ -28,6 +28,11 @@ import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+/**
+ * This class is the central configuration point for Spring Security.
+ * It enables web security, configures JWT-based authentication and authorization,
+ * and sets up the security filter chain.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -41,11 +46,25 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
+    /**
+     * Provides a PasswordEncoder bean that uses the BCrypt hashing algorithm.
+     * This is used to securely store user passwords.
+     * @return A BCryptPasswordEncoder instance.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Provides the AuthenticationManager bean.
+     * This manager is responsible for processing authentication requests.
+     * It uses a DaoAuthenticationProvider configured with our custom UserDetailsService and PasswordEncoder.
+     * @param http The HttpSecurity object.
+     * @param passwordEncoder The password encoder.
+     * @return The configured AuthenticationManager.
+     * @throws Exception if an error occurs during configuration.
+     */
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http, PasswordEncoder passwordEncoder) throws Exception {
         var auth = new DaoAuthenticationProvider();
@@ -54,6 +73,14 @@ public class SecurityConfig {
         return new ProviderManager(auth);
     }
 
+    /**
+     * Configures the main security filter chain.
+     * This method defines which endpoints are public and which require authentication.
+     * It disables CSRF, sets the session management to STATELESS (for JWT), and adds the custom JwtRequestFilter.
+     * @param http The HttpSecurity object to configure.
+     * @return The configured SecurityFilterChain.
+     * @throws Exception if an error occurs during configuration.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         JwtRequestFilter jwtRequestFilter = new JwtRequestFilter(jwtUtil, userDetailsService);
@@ -74,6 +101,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Provides a detailed CORS configuration source.
+     * This bean is used by the security filter chain to apply CORS policies.
+     * It specifies the allowed origins, methods, and headers for cross-origin requests.
+     * @return A configured CorsConfigurationSource.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

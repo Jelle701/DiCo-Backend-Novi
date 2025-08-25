@@ -9,6 +9,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * This controller manages user profile data.
+ * It provides endpoints for the authenticated user to retrieve their own profile
+ * and to save or update their profile details (e.g., during onboarding).
+ */
 @RestController
 @RequestMapping("/api/profile")
 public class ProfileController {
@@ -19,6 +24,11 @@ public class ProfileController {
         this.userService = userService;
     }
 
+    /**
+     * Retrieves the profile of the currently authenticated user.
+     * @param authentication The authentication object for the current user.
+     * @return A ResponseEntity containing the user's FullUserProfileDto.
+     */
     @GetMapping("/me")
     public ResponseEntity<FullUserProfileDto> getMyProfile(Authentication authentication) {
         String userEmail = authentication.getName();
@@ -26,6 +36,13 @@ public class ProfileController {
         return ResponseEntity.ok(userProfile);
     }
 
+    /**
+     * Saves or updates the profile details for the authenticated user.
+     * This endpoint is secured and can only be accessed by users with the 'PATIENT' role.
+     * @param authentication The authentication object for the current user.
+     * @param onboardingData The DTO containing the profile details to be saved.
+     * @return A ResponseEntity containing the updated FullUserProfileDto.
+     */
     @PutMapping("/details")
     @PreAuthorize("hasRole('PATIENT')") // SECURED: Only users with the default PATIENT role can submit onboarding details.
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(

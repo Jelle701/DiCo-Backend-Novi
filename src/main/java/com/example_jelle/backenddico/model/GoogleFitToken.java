@@ -2,20 +2,38 @@ package com.example_jelle.backenddico.model;
 
 import jakarta.persistence.*;
 
+/**
+ * This entity stores the OAuth2 tokens (access and refresh) for the Google Fit API.
+ * Each record is associated with a single user, allowing the application to make API calls on their behalf.
+ */
 @Entity
 public class GoogleFitToken {
 
+    /**
+     * The unique identifier for the token record.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The user to whom these tokens belong.
+     */
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
+    /**
+     * The short-lived access token used to authenticate API requests.
+     * Stored as TEXT to accommodate its potential length.
+     */
     @Column(columnDefinition = "TEXT")
     private String accessToken;
 
+    /**
+     * The long-lived refresh token used to obtain a new access token when the current one expires.
+     * Stored as TEXT to accommodate its potential length.
+     */
     @Column(columnDefinition = "TEXT")
     private String refreshToken;
 

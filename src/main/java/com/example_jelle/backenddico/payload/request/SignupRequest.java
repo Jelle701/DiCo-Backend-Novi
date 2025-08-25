@@ -6,26 +6,40 @@ import jakarta.validation.constraints.Size;
 import java.util.Set;
 
 /**
- * Represents the data transfer object for a user signup request.
- * It contains all the necessary information for a new user to register.
+ * This class is a Data Transfer Object (DTO) for user signup requests.
+ * It encapsulates the necessary information for a new user to register, including username, email, password, and optional roles.
  */
 public class SignupRequest {
 
+    /**
+     * The desired username for the new user.
+     * It must not be blank and its size must be between 3 and 20 characters.
+     */
     @NotBlank(message = "Username is required.")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters.")
     private String username;
 
+    /**
+     * The user's email address.
+     * It must not be blank, cannot be longer than 50 characters, and must be a valid email format.
+     */
     @NotBlank(message = "Email is required.")
     @Size(max = 50, message = "Email cannot be longer than 50 characters.")
     @Email(message = "Please provide a valid email address.")
     private String email;
 
+    /**
+     * The desired password for the new user.
+     * It must not be blank and its size must be between 6 and 40 characters.
+     */
     @NotBlank(message = "Password is required.")
     @Size(min = 6, max = 40, message = "Password must be between 6 and 40 characters.")
     private String password;
 
-    // This field is optional and allows specifying roles during signup (e.g., "user", "admin").
-    // If roles are not specified, a default role can be assigned in the service layer.
+    /**
+     * An optional set of roles to be assigned to the user upon registration (e.g., "user", "admin").
+     * If roles are not specified, a default role can be assigned in the service layer.
+     */
     private Set<String> role;
 
     // Getters and Setters

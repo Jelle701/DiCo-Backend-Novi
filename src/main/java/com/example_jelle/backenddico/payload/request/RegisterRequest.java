@@ -1,8 +1,17 @@
 package com.example_jelle.backenddico.payload.request;
 
-// This DTO is cleaned up to only include the necessary fields for registration.
+/**
+ * This class is a Data Transfer Object (DTO) for user registration requests.
+ * It contains the essential fields (email and password) needed to create a new user account.
+ */
 public class RegisterRequest {
+    /**
+     * The email address for the new account.
+     */
     private String email;
+    /**
+     * The password for the new account.
+     */
     private String password;
 
     public String getEmail() {

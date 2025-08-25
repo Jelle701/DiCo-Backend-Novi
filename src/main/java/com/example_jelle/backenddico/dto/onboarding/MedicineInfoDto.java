@@ -3,15 +3,25 @@ package com.example_jelle.backenddico.dto.onboarding;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * DTO for the user's medical information.
+ * This class is a Data Transfer Object (DTO) for the user's medical information,
+ * specifically related to their diabetes management.
  */
 public class MedicineInfoDto {
 
-    @NotBlank(message = "Diabetes type is verplicht.")
+    /**
+     * The type of diabetes the user has. This field is required.
+     */
+    @NotBlank(message = "Diabetes type is required.")
     private String diabetesType;
 
-    // These fields are optional
+    /**
+     * The type of long-acting insulin the user takes. This field is optional.
+     */
     private String longActingInsulin;
+
+    /**
+     * The type of short-acting insulin the user takes. This field is optional.
+     */
     private String shortActingInsulin;
 
     // Getters and Setters

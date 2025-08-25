@@ -5,10 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * This entity represents the detailed profile of a user, complementing the main User entity.
+ * It holds personal information (name, DOB), physical attributes (gender, height, weight),
+ * and medical details (diabetes type). It is linked to a User via a one-to-one relationship.
+ */
 @Entity
 @Table(name = "user_profiles")
 public class UserProfile {
 
+    /**
+     * The unique identifier for the user profile.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,8 +32,15 @@ public class UserProfile {
     private Double weight;
     private String diabetesType;
 
+    /**
+     * A hashed secret key for authenticating API requests from external uploaders (e.g., Nightscout).
+     */
     private String apiSecretHash;
 
+    /**
+     * The User account associated with this profile.
+     * This relationship is lazy-loaded and ignored during JSON serialization to prevent infinite loops.
+     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id") // Explicitly define the foreign key column
     @JsonIgnore

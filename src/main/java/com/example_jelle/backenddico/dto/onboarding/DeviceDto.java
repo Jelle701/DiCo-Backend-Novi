@@ -5,21 +5,31 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 /**
- * DTO voor een individueel diabetisch apparaat.
- * Alle velden zijn verplicht.
+ * This class is a Data Transfer Object (DTO) for an individual diabetic device.
+ * It is used during the onboarding process to capture details about the user's equipment.
+ * All fields are mandatory.
  */
 public class DeviceDto {
 
-    @NotNull(message = "Categorie is verplicht.")
+    /**
+     * The category of the device (e.g., PUMP, SENSOR). This field is required.
+     */
+    @NotNull(message = "Category is required.")
     private DeviceCategory categorie;
 
-    @NotBlank(message = "Fabrikant mag niet leeg zijn.")
+    /**
+     * The manufacturer of the device. This field cannot be blank.
+     */
+    @NotBlank(message = "Manufacturer cannot be blank.")
     private String fabrikant;
 
-    @NotBlank(message = "Model mag niet leeg zijn.")
+    /**
+     * The model name or number of the device. This field cannot be blank.
+     */
+    @NotBlank(message = "Model cannot be blank.")
     private String model;
 
-    // Getters en Setters
+    // Getters and Setters
     public DeviceCategory getCategorie() {
         return categorie;
     }

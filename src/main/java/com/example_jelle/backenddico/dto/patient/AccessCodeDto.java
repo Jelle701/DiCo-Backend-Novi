@@ -1,5 +1,9 @@
 package com.example_jelle.backenddico.dto.patient;
 
+/**
+ * This class is a Data Transfer Object (DTO) for an access code.
+ * It is used to send an access code to the client.
+ */
 public class AccessCodeDto {
     private String accessCode;
 

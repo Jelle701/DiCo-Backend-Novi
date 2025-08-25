@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * This controller handles provider-specific actions, such as linking to patient accounts
+ * and viewing linked patients. All endpoints are restricted to users with the 'PROVIDER' role.
+ */
 @RestController
 @RequestMapping("/api/provider")
 public class ProviderController {
@@ -21,6 +25,12 @@ public class ProviderController {
         this.providerService = providerService;
     }
 
+    /**
+     * Links the authenticated provider to a patient using a patient-provided access code.
+     * @param authentication The authentication object for the current provider.
+     * @param request The request body containing the patient's access code.
+     * @return A ResponseEntity with an empty body and HTTP status 200 OK on success.
+     */
     @PostMapping("/link-patient")
     @PreAuthorize("hasRole('PROVIDER')")
     public ResponseEntity<Void> linkPatient(Authentication authentication, @Valid @RequestBody LinkPatientRequestDto request) {
@@ -29,6 +39,11 @@ public class ProviderController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Retrieves a list of all patients linked to the authenticated provider.
+     * @param authentication The authentication object for the current provider.
+     * @return A ResponseEntity containing a list of FullUserProfileDto for the linked patients.
+     */
     @GetMapping("/patients")
     @PreAuthorize("hasRole('PROVIDER')")
     public ResponseEntity<List<FullUserProfileDto>> getLinkedPatients(Authentication authentication) {
