@@ -15,13 +15,13 @@ public class DeviceDto {
      * The category of the device (e.g., PUMP, SENSOR). This field is required.
      */
     @NotNull(message = "Category is required.")
-    private DeviceCategory categorie;
+    private DeviceCategory category;
 
     /**
-     * The manufacturer of the device. This field cannot be blank.
+     * The brand of the device. This field cannot be blank.
      */
-    @NotBlank(message = "Manufacturer cannot be blank.")
-    private String fabrikant;
+    @NotBlank(message = "Brand cannot be blank.")
+    private String brand;
 
     /**
      * The model name or number of the device. This field cannot be blank.
@@ -30,20 +30,20 @@ public class DeviceDto {
     private String model;
 
     // Getters and Setters
-    public DeviceCategory getCategorie() {
-        return categorie;
+    public DeviceCategory getCategory() {
+        return category;
     }
 
-    public void setCategorie(DeviceCategory categorie) {
-        this.categorie = categorie;
+    public void setCategory(DeviceCategory category) {
+        this.category = category;
     }
 
-    public String getFabrikant() {
-        return fabrikant;
+    public String getBrand() {
+        return brand;
     }
 
-    public void setFabrikant(String fabrikant) {
-        this.fabrikant = fabrikant;
+    public void setBrand(String brand) {
+        this.brand = brand;
     }
 
     public String getModel() {
