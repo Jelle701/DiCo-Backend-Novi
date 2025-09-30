@@ -1,7 +1,9 @@
 package com.example_jelle.backenddico;
 
+import com.example_jelle.backenddico.service.GoogleFitService;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 /**
  * This is the main integration test class for the Backend Dico application.
@@ -10,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
  */
 @SpringBootTest
 class BackendDicoApplicationTests {
+
+    @MockBean
+    private GoogleFitService googleFitService;
 
     /**
      * This test method checks if the application context can be loaded successfully.

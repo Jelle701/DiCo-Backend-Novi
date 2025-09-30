@@ -13,6 +13,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * This utility class provides methods for handling JSON Web Tokens (JWTs).
@@ -67,6 +68,16 @@ public class JwtUtil {
     }
 
     /**
+     * Extracts the 'roles' claim (authorities) from a given JWT.
+     * @param token The JWT.
+     * @return A list of strings representing the roles.
+     */
+    public List<String> extractRoles(String token) {
+        final Claims claims = extractAllClaims(token);
+        return claims.get("roles", List.class);
+    }
+
+    /**
      * A generic method to extract a specific claim from a JWT using a claims resolver function.
      * @param token The JWT.
      * @param claimsResolver A function that takes the claims and returns the desired value.
@@ -106,8 +117,13 @@ public class JwtUtil {
      * @return The generated JWT string.
      */
     public String generateToken(UserDetails userDetails) {
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .collect(Collectors.toList());
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("roles", roles) // Add roles claim
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

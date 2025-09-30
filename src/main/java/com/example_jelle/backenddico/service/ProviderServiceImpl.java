@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
+import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.exception.InvalidAccessException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
@@ -7,6 +9,7 @@ import com.example_jelle.backenddico.model.AccessCode;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.AccessCodeRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
+import com.example_jelle.backenddico.security.JwtUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,12 +26,14 @@ public class ProviderServiceImpl implements ProviderService {
 
     private final UserRepository userRepository;
     private final AccessCodeRepository accessCodeRepository;
-    private final UserService userService; // Re-use for DTO conversion
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
-    public ProviderServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository, UserService userService) {
+    public ProviderServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository, UserService userService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.accessCodeRepository = accessCodeRepository;
         this.userService = userService;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -73,5 +78,54 @@ public class ProviderServiceImpl implements ProviderService {
         return provider.getLinkedPatients().stream()
                 .map(patient -> userService.getFullUserProfile(patient.getUsername()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Generates a temporary, patient-specific token for a linked patient.
+     * @param providerUsername The username of the provider requesting the token.
+     * @param patientId The ID of the patient for whom to generate the delegated token.
+     * @return A DelegatedTokenResponseDto containing the delegated token and patient username.
+     */
+    @Override
+    public DelegatedTokenResponseDto generateDelegatedToken(String providerUsername, Long patientId) {
+        User provider = userRepository.findByUsername(providerUsername)
+                .orElseThrow(() -> new UserNotFoundException("Provider not found: " + providerUsername));
+
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new UserNotFoundException("Patient not found with ID: " + patientId));
+
+        if (!provider.getLinkedPatients().contains(patient)) {
+            throw new InvalidAccessException("Provider is not linked to this patient.");
+        }
+
+        String delegatedToken = jwtUtil.generateDelegatedToken(patient.getUsername());
+        return new DelegatedTokenResponseDto(delegatedToken, patient.getUsername());
+    }
+
+    /**
+     * Retrieves an aggregated overview of all patients linked to the authenticated provider.
+     * @param providerUsername The username of the provider.
+     * @return A DashboardSummaryDto containing the aggregated summary.
+     */
+    @Override
+    public DashboardSummaryDto getDashboardSummary(String providerUsername) {
+        User provider = userRepository.findByUsername(providerUsername)
+                .orElseThrow(() -> new UserNotFoundException("Provider not found: " + providerUsername));
+
+        List<User> linkedPatients = provider.getLinkedPatients().stream().collect(Collectors.toList());
+
+        // Placeholder for actual aggregation logic
+        int totalPatients = linkedPatients.size();
+        int patientsWithHighGlucose = 0; // This would involve checking health data for each patient
+        int patientsWithLowGlucose = 0;  // This would involve checking health data for each patient
+
+        // In a real scenario, you would iterate through linkedPatients and fetch/aggregate their health data
+        // For example:
+        // for (User patient : linkedPatients) {
+        //     // Fetch patient's health data and determine high/low glucose counts
+        //     // This would likely involve another service, e.g., healthDataService.getGlucoseReadings(patient.getUsername())
+        // }
+
+        return new DashboardSummaryDto(totalPatients, patientsWithHighGlucose, patientsWithLowGlucose);
     }
 }

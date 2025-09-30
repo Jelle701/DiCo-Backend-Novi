@@ -38,13 +38,13 @@ public class ProfileController {
 
     /**
      * Saves or updates the profile details for the authenticated user.
-     * This endpoint is secured and can only be accessed by users with the 'PATIENT' role.
+     * This endpoint is secured and can only be accessed by users with the 'PATIENT', 'PROVIDER', or 'GUARDIAN' role.
      * @param authentication The authentication object for the current user.
      * @param onboardingData The DTO containing the profile details to be saved.
      * @return A ResponseEntity containing the updated FullUserProfileDto.
      */
     @PutMapping("/details")
-    @PreAuthorize("hasRole('PATIENT')") // SECURED: Only users with the default PATIENT role can submit onboarding details.
+    @PreAuthorize("hasAnyRole('PATIENT', 'PROVIDER', 'GUARDIAN')") // SECURED: Users with PATIENT, PROVIDER, or GUARDIAN roles can submit onboarding details.
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(
             Authentication authentication,
             @Valid @RequestBody OnboardingRequestDto onboardingData) {

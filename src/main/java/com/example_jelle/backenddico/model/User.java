@@ -63,6 +63,9 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<UserDevice> userDevices = new ArrayList<>();
+
     // Getters and Setters
 
     public Long getId() { return id; }
@@ -99,6 +102,8 @@ public class User {
     public void setLinkedPatients(Set<User> linkedPatients) { this.linkedPatients = linkedPatients; }
     public List<GlucoseMeasurement> getGlucoseMeasurements() { return glucoseMeasurements; }
     public void setGlucoseMeasurements(List<GlucoseMeasurement> glucoseMeasurements) { this.glucoseMeasurements = glucoseMeasurements; }
+    public List<UserDevice> getUserDevices() { return userDevices; }
+    public void setUserDevices(List<UserDevice> userDevices) { this.userDevices = userDevices; }
 
     public void addGlucoseMeasurement(GlucoseMeasurement measurement) {
         this.glucoseMeasurements.add(measurement);

@@ -23,7 +23,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userService.findByUsername(username)
+        // Convert username to lowercase to match how it's stored in the database
+        String lowerCaseUsername = username.toLowerCase();
+        User user = userService.findByUsername(lowerCaseUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         // FIXED: Convert the Role enum to a Spring Security authority string (e.g., "ROLE_PATIENT")

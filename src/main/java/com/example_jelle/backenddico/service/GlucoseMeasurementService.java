@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * This interface defines the contract for managing glucose measurements.
  * It provides methods for adding new measurements and retrieving recent ones.
+ * // Added a comment to force recompile
  */
 public interface GlucoseMeasurementService {
 

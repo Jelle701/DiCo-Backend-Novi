@@ -29,6 +29,16 @@ public class DeviceDto {
     @NotBlank(message = "Model cannot be blank.")
     private String model;
 
+    public DeviceDto() {
+        // Default constructor for Jackson/Spring
+    }
+
+    public DeviceDto(DeviceCategory category, String brand, String model) {
+        this.category = category;
+        this.brand = brand;
+        this.model = model;
+    }
+
     // Getters and Setters
     public DeviceCategory getCategory() {
         return category;

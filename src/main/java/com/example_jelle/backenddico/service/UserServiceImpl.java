@@ -4,6 +4,7 @@ import com.example_jelle.backenddico.dto.onboarding.DeviceDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.UserDto;
+import com.example_jelle.backenddico.exception.BadRequestException;
 import com.example_jelle.backenddico.exception.EmailAlreadyExists;
 import com.example_jelle.backenddico.exception.InvalidTokenException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
@@ -31,7 +32,7 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
     private final AccessCodeRepository accessCodeRepository;
-    private final UserDeviceRepository userDeviceRepository; // Repository for devices
+    private final UserDeviceRepository userDeviceRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -39,7 +40,7 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.accessCodeRepository = accessCodeRepository;
-        this.userDeviceRepository = userDeviceRepository; // Injected repository
+        this.userDeviceRepository = userDeviceRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -95,39 +96,78 @@ public class UserServiceImpl implements UserService {
             Role role = Role.valueOf(onboardingRequestDto.getRole().toUpperCase());
             user.setRole(role);
         } catch (IllegalArgumentException e) {
-            throw new InvalidTokenException("Invalid role specified: " + onboardingRequestDto.getRole());
+            throw new BadRequestException("Invalid role specified: " + onboardingRequestDto.getRole());
         }
+
+        // Set first name and last name
+        user.setFirstName(onboardingRequestDto.getFirstName());
+        user.setLastName(onboardingRequestDto.getLastName());
 
         user.setDob(onboardingRequestDto.getDateOfBirth());
 
         userProfile.setLength(onboardingRequestDto.getHeight());
         userProfile.setWeight(onboardingRequestDto.getWeight());
+
+        // The fields are now optional for all roles, and null values will be handled by the entity.
+        // The previous conditional block for PATIENT role validation has been removed entirely.
+
         userProfile.setGender(onboardingRequestDto.getGender());
         userProfile.setDiabetesType(onboardingRequestDto.getDiabetesType());
         userProfile.setLongActingInsulin(onboardingRequestDto.getLongActingInsulin());
         userProfile.setShortActingInsulin(onboardingRequestDto.getShortActingInsulin());
 
-        // Clear existing devices and save the new ones
-        userDeviceRepository.deleteAllByUser(user);
+        // Log the received diabetic devices
+        if (onboardingRequestDto.getDiabeticDevices() != null && !onboardingRequestDto.getDiabeticDevices().isEmpty()) {
+            logger.info("Received diabetic devices for user {}: {}", username, onboardingRequestDto.getDiabeticDevices());
+        } else {
+            logger.info("No diabetic devices received for user {}.", username);
+        }
+
+        logger.info("User devices BEFORE clearing for user {}: {}", username, user.getUserDevices());
+        // Clear existing devices from the user's collection and add new ones
+        user.getUserDevices().clear(); // Clear the collection in memory
+        logger.info("User devices AFTER clearing for user {}: {}", username, user.getUserDevices());
+
         if (onboardingRequestDto.getDiabeticDevices() != null) {
             for (DeviceDto deviceDto : onboardingRequestDto.getDiabeticDevices()) {
                 UserDevice device = new UserDevice();
-                device.setUser(user);
                 device.setCategory(deviceDto.getCategory().name());
                 device.setManufacturer(deviceDto.getBrand());
                 device.setModel(deviceDto.getModel());
-                userDeviceRepository.save(device);
+                user.getUserDevices().add(device); // Add to the collection
+                device.setUser(user); // Set the parent user
             }
         }
+        logger.info("User devices AFTER adding new devices for user {}: {}", username, user.getUserDevices());
 
-        // Set the flag indicating details have been saved
-        user.getFlags().setHasDetails(true);
+        // Logic to set hasDetails flag based on user role and provided data
+        boolean hasAllPatientDetails = false;
+        if (user.getRole() == Role.PATIENT) {
+            if (onboardingRequestDto.getFirstName() != null && !onboardingRequestDto.getFirstName().trim().isEmpty() &&
+                onboardingRequestDto.getLastName() != null && !onboardingRequestDto.getLastName().trim().isEmpty() &&
+                onboardingRequestDto.getDateOfBirth() != null &&
+                onboardingRequestDto.getGender() != null &&
+                onboardingRequestDto.getHeight() > 0 &&
+                onboardingRequestDto.getWeight() > 0 &&
+                onboardingRequestDto.getDiabetesType() != null &&
+                onboardingRequestDto.getLongActingInsulin() != null && !onboardingRequestDto.getLongActingInsulin().trim().isEmpty() &&
+                onboardingRequestDto.getShortActingInsulin() != null && !onboardingRequestDto.getShortActingInsulin().trim().isEmpty() &&
+                onboardingRequestDto.getDiabeticDevices() != null) { // diabeticDevices can be an empty list, but not null
+                hasAllPatientDetails = true;
+            }
+            user.getFlags().setHasDetails(hasAllPatientDetails);
+        } else {
+            // For PROVIDER and GUARDIAN, set hasDetails to true as per instruction
+            user.getFlags().setHasDetails(true);
+        }
 
         userRepository.save(user);
         logger.info("Saved profile details and devices for user: {}", username);
+        logger.info("User devices AFTER saving user entity for user {}: {}", username, user.getUserDevices());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public FullUserProfileDto getFullUserProfile(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
@@ -153,10 +193,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(patientEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + patientEmail));
 
-        String code = String.format("%s-%s-%s",
-            UUID.randomUUID().toString().substring(0, 3).toUpperCase(),
-            UUID.randomUUID().toString().substring(0, 3).toUpperCase(),
-            UUID.randomUUID().toString().substring(0, 3).toUpperCase());
+        // Generate a 6-digit numeric code
+        String code = String.format("%06d", new Random().nextInt(1000000));
 
         AccessCode accessCode = new AccessCode();
         accessCode.setUser(user);

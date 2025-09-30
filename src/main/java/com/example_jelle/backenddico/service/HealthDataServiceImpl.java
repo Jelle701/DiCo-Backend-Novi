@@ -1,5 +1,6 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
 import com.example_jelle.backenddico.dto.health.DailyStepsDto;
 import com.example_jelle.backenddico.dto.health.DataPointDto;
 import com.example_jelle.backenddico.dto.health.HealthDataRequest;
@@ -28,6 +29,7 @@ public class HealthDataServiceImpl implements HealthDataService {
 
     private final UserRepository userRepository;
     private final HealthDataRepository healthDataRepository;
+    private final GlucoseMeasurementService glucoseMeasurementService;
 
     /**
      * Saves health data points from a request for a specific user.
@@ -105,6 +107,8 @@ public class HealthDataServiceImpl implements HealthDataService {
             latestHeartRate.setValue(latestHealthData.getValue());
         }
 
-        return new HealthDataResponse(stepsLast7Days, latestHeartRate);
+        List<GlucoseMeasurementDto> glucoseMeasurements = glucoseMeasurementService.getRecentMeasurements(username);
+
+        return new HealthDataResponse(stepsLast7Days, latestHeartRate, glucoseMeasurements);
     }
 }

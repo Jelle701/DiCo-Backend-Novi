@@ -25,4 +25,5 @@ public class DeviceUsageServiceImpl implements DeviceUsageService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         return repository.findByUser(user);
     }
+    // Added a comment to force recompile
 }

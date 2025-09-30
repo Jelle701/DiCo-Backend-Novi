@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
+import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import java.util.List;
 
@@ -22,4 +24,19 @@ public interface ProviderService {
      * @return A list of FullUserProfileDto objects representing the linked patients.
      */
     List<FullUserProfileDto> getLinkedPatients(String providerUsername);
+
+    /**
+     * Generates a temporary, patient-specific token for a linked patient.
+     * @param providerUsername The username of the provider requesting the token.
+     * @param patientId The ID of the patient for whom to generate the delegated token.
+     * @return A DelegatedTokenResponseDto containing the delegated token and patient username.
+     */
+    DelegatedTokenResponseDto generateDelegatedToken(String providerUsername, Long patientId);
+
+    /**
+     * Retrieves an aggregated overview of all patients linked to the authenticated provider.
+     * @param providerUsername The username of the provider.
+     * @return A DashboardSummaryDto containing the aggregated summary.
+     */
+    DashboardSummaryDto getDashboardSummary(String providerUsername);
 }

@@ -2,7 +2,6 @@ package com.example_jelle.backenddico.model;
 
 import com.example_jelle.backenddico.model.enums.DiabetesType;
 import com.example_jelle.backenddico.model.enums.Gender;
-import com.example_jelle.backenddico.model.enums.InsulinType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -10,7 +9,8 @@ import java.time.LocalDate;
 /**
  * This entity represents the detailed profile of a user, complementing the main User entity.
  * It holds personal information (name, DOB), physical attributes (gender, height, weight),
- * and medical details (diabetes type). It is linked to a User via a one-to-one relationship.
+ * and medical details (diabetes type).
+ * It is linked to a User via a one-to-one relationship.
  */
 @Entity
 @Table(name = "user_profiles")
@@ -33,11 +33,9 @@ public class UserProfile {
     @Enumerated(EnumType.STRING)
     private DiabetesType diabetesType;
 
-    @Enumerated(EnumType.STRING)
-    private InsulinType longActingInsulin;
+    private String longActingInsulin;
 
-    @Enumerated(EnumType.STRING)
-    private InsulinType shortActingInsulin;
+    private String shortActingInsulin;
 
     private String apiSecretHash;
 
@@ -112,19 +110,19 @@ public class UserProfile {
         this.diabetesType = diabetesType;
     }
 
-    public InsulinType getLongActingInsulin() {
+    public String getLongActingInsulin() {
         return longActingInsulin;
     }
 
-    public void setLongActingInsulin(InsulinType longActingInsulin) {
+    public void setLongActingInsulin(String longActingInsulin) {
         this.longActingInsulin = longActingInsulin;
     }
 
-    public InsulinType getShortActingInsulin() {
+    public String getShortActingInsulin() {
         return shortActingInsulin;
     }
 
-    public void setShortActingInsulin(InsulinType shortActingInsulin) {
+    public void setShortActingInsulin(String shortActingInsulin) {
         this.shortActingInsulin = shortActingInsulin;
     }
 

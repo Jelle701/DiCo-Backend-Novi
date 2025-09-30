@@ -2,10 +2,8 @@ package com.example_jelle.backenddico.dto.onboarding;
 
 import com.example_jelle.backenddico.model.enums.DiabetesType;
 import com.example_jelle.backenddico.model.enums.Gender;
-import com.example_jelle.backenddico.model.enums.InsulinType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -17,18 +15,18 @@ import java.util.List;
  */
 public class OnboardingRequestDto {
 
+    private String firstName;
+    private String lastName;
     private double height;
     private double weight;
     private LocalDate dateOfBirth;
 
-    @NotNull(message = "Gender is required.")
     private Gender gender;
 
-    @NotNull(message = "Diabetes type is required.")
     private DiabetesType diabetesType;
 
-    private InsulinType longActingInsulin;
-    private InsulinType shortActingInsulin;
+    private String longActingInsulin;
+    private String shortActingInsulin;
 
     @Valid // Ensures validation is cascaded to the objects in the list
     private List<DeviceDto> diabeticDevices;
@@ -37,6 +35,22 @@ public class OnboardingRequestDto {
     private String role;
 
     // Getters and Setters
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
 
     public double getHeight() {
         return height;
@@ -78,19 +92,19 @@ public class OnboardingRequestDto {
         this.diabetesType = diabetesType;
     }
 
-    public InsulinType getLongActingInsulin() {
+    public String getLongActingInsulin() {
         return longActingInsulin;
     }
 
-    public void setLongActingInsulin(InsulinType longActingInsulin) {
+    public void setLongActingInsulin(String longActingInsulin) {
         this.longActingInsulin = longActingInsulin;
     }
 
-    public InsulinType getShortActingInsulin() {
+    public String getShortActingInsulin() {
         return shortActingInsulin;
     }
 
-    public void setShortActingInsulin(InsulinType shortActingInsulin) {
+    public void setShortActingInsulin(String shortActingInsulin) {
         this.shortActingInsulin = shortActingInsulin;
     }
 

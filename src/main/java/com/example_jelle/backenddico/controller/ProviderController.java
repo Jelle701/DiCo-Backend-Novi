@@ -1,6 +1,8 @@
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.guardian.LinkPatientRequestDto;
+import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
+import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.service.ProviderService;
 import jakarta.validation.Valid;
@@ -50,5 +52,36 @@ public class ProviderController {
         String providerUsername = authentication.getName();
         List<FullUserProfileDto> patients = providerService.getLinkedPatients(providerUsername);
         return ResponseEntity.ok(patients);
+    }
+
+    /**
+     * Requests a temporary, patient-specific token for a linked patient.
+     * This token has limited rights (scope read:dashboard) and is used by the frontend
+     * to fetch the patient's dashboard data.
+     * @param authentication The authentication object for the current provider.
+     * @param patientId The ID of the patient for whom to generate the delegated token.
+     * @return A ResponseEntity containing the delegated token and patient username.
+     */
+    @PostMapping("/patients/{patientId}/delegate-token")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<DelegatedTokenResponseDto> delegateToken(
+            Authentication authentication,
+            @PathVariable Long patientId) {
+        String providerUsername = authentication.getName();
+        DelegatedTokenResponseDto response = providerService.generateDelegatedToken(providerUsername, patientId);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves an aggregated overview of all patients linked to the authenticated provider.
+     * @param authentication The authentication object for the current provider.
+     * @return A ResponseEntity containing a DashboardSummaryDto.
+     */
+    @GetMapping("/dashboard-summary")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<DashboardSummaryDto> getDashboardSummary(Authentication authentication) {
+        String providerUsername = authentication.getName();
+        DashboardSummaryDto summary = providerService.getDashboardSummary(providerUsername);
+        return ResponseEntity.ok(summary);
     }
 }

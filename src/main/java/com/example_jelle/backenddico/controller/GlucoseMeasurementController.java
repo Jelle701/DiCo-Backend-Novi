@@ -22,19 +22,19 @@ public class GlucoseMeasurementController {
 
     private final GlucoseMeasurementService measurementService;
 
-    public GlucoseMeasurementController(GlucoseMeasurementService measurementService) {
+    public GlucoseMeasurementController(GlucoseMeasurementService measurementService) { // Corrected constructor name
         this.measurementService = measurementService;
     }
 
     /**
      * Adds a new glucose measurement for the authenticated user.
-     * The user must have the 'USER' role.
+     * The user must have the 'PATIENT' role.
      * @param authentication The authentication object for the current user.
      * @param measurementDto The DTO containing the details of the glucose measurement.
      * @return A ResponseEntity containing the saved GlucoseMeasurementDto with HTTP status 201 CREATED.
      */
     @PostMapping
-    @PreAuthorize("hasRole('USER')") // FIX: Aangepast van 'ADMIN' naar 'USER'
+    @PreAuthorize("hasRole('PATIENT')") // Aangepast van 'USER' naar 'PATIENT'
     public ResponseEntity<GlucoseMeasurementDto> addGlucoseMeasurement(
             Authentication authentication,
             @Valid @RequestBody GlucoseMeasurementDto measurementDto) {
@@ -47,12 +47,12 @@ public class GlucoseMeasurementController {
 
     /**
      * Retrieves recent glucose measurements for the authenticated user.
-     * The user must have the 'USER' role.
+     * The user must have the 'PATIENT' role.
      * @param authentication The authentication object for the current user.
      * @return A ResponseEntity containing a list of recent GlucoseMeasurementDto objects.
      */
     @GetMapping
-    @PreAuthorize("hasRole('USER')") // Consistentie: ook hier de juiste rol vereisen
+    @PreAuthorize("hasRole('PATIENT')") // Consistentie: ook hier de juiste rol vereisen
     public ResponseEntity<List<GlucoseMeasurementDto>> getRecentGlucoseMeasurements(Authentication authentication) {
         String userEmail = authentication.getName();
         List<GlucoseMeasurementDto> measurements = measurementService.getRecentMeasurements(userEmail);
