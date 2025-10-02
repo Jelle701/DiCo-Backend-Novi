@@ -3,6 +3,7 @@ package com.example_jelle.backenddico.controller;
 import com.example_jelle.backenddico.dto.guardian.LinkPatientRequestDto;
 import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
+import com.example_jelle.backenddico.dto.provider.PatientDashboardSummaryDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.service.ProviderService;
 import jakarta.validation.Valid;
@@ -82,6 +83,22 @@ public class ProviderController {
     public ResponseEntity<DashboardSummaryDto> getDashboardSummary(Authentication authentication) {
         String providerUsername = authentication.getName();
         DashboardSummaryDto summary = providerService.getDashboardSummary(providerUsername);
+        return ResponseEntity.ok(summary);
+    }
+
+    /**
+     * Retrieves a dashboard summary for a specific patient linked to the authenticated provider.
+     * @param authentication The authentication object for the current provider.
+     * @param patientId The ID of the patient for whom to retrieve the summary.
+     * @return A ResponseEntity containing the PatientDashboardSummaryDto for the specific patient.
+     */
+    @GetMapping("/patients/{patientId}/dashboard-summary")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<PatientDashboardSummaryDto> getPatientDashboardSummary(
+            Authentication authentication,
+            @PathVariable Long patientId) {
+        String providerUsername = authentication.getName();
+        PatientDashboardSummaryDto summary = providerService.getPatientDashboardSummary(providerUsername, patientId);
         return ResponseEntity.ok(summary);
     }
 }

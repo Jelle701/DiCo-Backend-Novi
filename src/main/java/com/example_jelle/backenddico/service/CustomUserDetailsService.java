@@ -1,5 +1,6 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.model.Role;
 import com.example_jelle.backenddico.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -23,14 +23,20 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Convert username to lowercase to match how it's stored in the database
         String lowerCaseUsername = username.toLowerCase();
         User user = userService.findByUsername(lowerCaseUsername)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
-        // FIXED: Convert the Role enum to a Spring Security authority string (e.g., "ROLE_PATIENT")
         List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        Role userRole = user.getRole();
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.name()));
+
+        // If the user is an admin, grant all other roles as well
+        if (userRole == Role.ADMIN) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + Role.PATIENT.name()));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + Role.GUARDIAN.name()));
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + Role.PROVIDER.name()));
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),

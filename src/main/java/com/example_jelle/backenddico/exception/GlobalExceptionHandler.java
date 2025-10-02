@@ -26,6 +26,18 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
+     * Handles the UserNotFoundException.
+     * @param ex The exception instance.
+     * @param request The web request.
+     * @return A ResponseEntity with a 404 NOT FOUND status and a clear error message.
+     */
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<MessageResponse> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
+        MessageResponse messageResponse = new MessageResponse(ex.getMessage());
+        return new ResponseEntity<>(messageResponse, HttpStatus.NOT_FOUND);
+    }
+
+    /**
      * Handles the EmailAlreadyExists exception.
      * @param ex The exception instance.
      * @param request The web request.

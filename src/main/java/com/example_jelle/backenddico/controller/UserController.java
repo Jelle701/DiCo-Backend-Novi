@@ -3,6 +3,7 @@ package com.example_jelle.backenddico.controller;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,5 +28,17 @@ public class UserController {
     public ResponseEntity<FullUserProfileDto> getFullUserProfile(@PathVariable String username) {
         FullUserProfileDto userProfile = userService.getFullUserProfile(username);
         return ResponseEntity.ok(userProfile);
+    }
+
+    /**
+     * Deletes the currently authenticated user's account.
+     * @param authentication The authentication object containing the user's details.
+     * @return A ResponseEntity indicating success.
+     */
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMyUser(Authentication authentication) {
+        String username = authentication.getName();
+        userService.deleteUser(username);
+        return ResponseEntity.ok().build();
     }
 }

@@ -1,11 +1,14 @@
 package com.example_jelle.backenddico.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -35,6 +38,10 @@ public class User {
 
     private boolean enabled;
 
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     @Embedded
     private UserFlags flags = new UserFlags(); // Initialize to avoid nulls
 
@@ -48,14 +55,11 @@ public class User {
     @Column(unique = true)
     private String hashedAccessCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "linked_patient_id")
-    private User linkedPatient;
-
+    // This is the unified relationship for both GUARDIAN and PROVIDER
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-        name = "provider_patient_links",
-        joinColumns = @JoinColumn(name = "provider_id"),
+        name = "user_patient_links", // Generic name for all links
+        joinColumns = @JoinColumn(name = "user_id"), // Represents the guardian or provider
         inverseJoinColumns = @JoinColumn(name = "patient_id")
     )
     private Set<User> linkedPatients = new HashSet<>();
@@ -86,6 +90,8 @@ public class User {
     public void setRole(Role role) { this.role = role; }
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public UserFlags getFlags() { return flags; }
     public void setFlags(UserFlags flags) { this.flags = flags; }
     public UserProfile getUserProfile() { return userProfile; }
@@ -96,8 +102,6 @@ public class User {
     public void setVerificationCodeExpires(LocalDateTime verificationCodeExpires) { this.verificationCodeExpires = verificationCodeExpires; }
     public String getHashedAccessCode() { return hashedAccessCode; }
     public void setHashedAccessCode(String hashedAccessCode) { this.hashedAccessCode = hashedAccessCode; }
-    public User getLinkedPatient() { return linkedPatient; }
-    public void setLinkedPatient(User linkedPatient) { this.linkedPatient = linkedPatient; }
     public Set<User> getLinkedPatients() { return linkedPatients; }
     public void setLinkedPatients(Set<User> linkedPatients) { this.linkedPatients = linkedPatients; }
     public List<GlucoseMeasurement> getGlucoseMeasurements() { return glucoseMeasurements; }
@@ -108,5 +112,18 @@ public class User {
     public void addGlucoseMeasurement(GlucoseMeasurement measurement) {
         this.glucoseMeasurements.add(measurement);
         measurement.setUser(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

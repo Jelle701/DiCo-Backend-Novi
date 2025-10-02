@@ -2,6 +2,7 @@ package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
 import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
+import com.example_jelle.backenddico.dto.provider.PatientDashboardSummaryDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import java.util.List;
 
@@ -39,4 +40,12 @@ public interface ProviderService {
      * @return A DashboardSummaryDto containing the aggregated summary.
      */
     DashboardSummaryDto getDashboardSummary(String providerUsername);
+
+    /**
+     * Retrieves a dashboard summary for a specific patient linked to the authenticated provider.
+     * @param providerUsername The username of the provider.
+     * @param patientId The ID of the patient for whom to retrieve the summary.
+     * @return A PatientDashboardSummaryDto containing the summary for the specific patient.
+     */
+    PatientDashboardSummaryDto getPatientDashboardSummary(String providerUsername, Long patientId);
 }

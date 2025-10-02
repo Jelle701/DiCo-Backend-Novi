@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
+import com.example_jelle.backenddico.dto.AdminUserDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.UserDto;
 import com.example_jelle.backenddico.payload.request.RegisterRequest;
@@ -67,4 +69,30 @@ public interface UserService {
      * @return The active access code, or null if not found.
      */
     String getAccessCode(String patientEmail);
+
+    /**
+     * Deletes a user and all associated data.
+     * @param username The username of the user to delete.
+     */
+    void deleteUser(String username);
+
+    /**
+     * Retrieves a list of all users formatted for the admin dashboard.
+     * @return A list of AdminUserDto objects.
+     */
+    List<AdminUserDto> getAllUsersForAdmin();
+
+    /**
+     * Deletes a user by their ID, for admin purposes.
+     * @param userId The ID of the user to delete.
+     */
+    void deleteUserById(Long userId);
+
+    /**
+     * Updates a user's details as an admin.
+     * @param userId The ID of the user to update.
+     * @param updateUserDto The DTO containing the fields to update.
+     * @return The updated user details as an AdminUserDto.
+     */
+    AdminUserDto updateUserAsAdmin(Long userId, AdminUpdateUserDto updateUserDto);
 }

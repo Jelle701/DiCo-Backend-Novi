@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
+import com.example_jelle.backenddico.dto.AdminUserDto;
 import com.example_jelle.backenddico.dto.onboarding.DeviceDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
@@ -15,10 +17,10 @@ import com.example_jelle.backenddico.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, AccessCodeRepository accessCodeRepository, UserDeviceRepository userDeviceRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, AccessCodeRepository accessCodeRepository, UserDeviceRepository userDeviceRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.accessCodeRepository = accessCodeRepository;
@@ -99,24 +101,16 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Invalid role specified: " + onboardingRequestDto.getRole());
         }
 
-        // Set first name and last name
         user.setFirstName(onboardingRequestDto.getFirstName());
         user.setLastName(onboardingRequestDto.getLastName());
-
         user.setDob(onboardingRequestDto.getDateOfBirth());
-
         userProfile.setLength(onboardingRequestDto.getHeight());
         userProfile.setWeight(onboardingRequestDto.getWeight());
-
-        // The fields are now optional for all roles, and null values will be handled by the entity.
-        // The previous conditional block for PATIENT role validation has been removed entirely.
-
         userProfile.setGender(onboardingRequestDto.getGender());
         userProfile.setDiabetesType(onboardingRequestDto.getDiabetesType());
         userProfile.setLongActingInsulin(onboardingRequestDto.getLongActingInsulin());
         userProfile.setShortActingInsulin(onboardingRequestDto.getShortActingInsulin());
 
-        // Log the received diabetic devices
         if (onboardingRequestDto.getDiabeticDevices() != null && !onboardingRequestDto.getDiabeticDevices().isEmpty()) {
             logger.info("Received diabetic devices for user {}: {}", username, onboardingRequestDto.getDiabeticDevices());
         } else {
@@ -124,8 +118,7 @@ public class UserServiceImpl implements UserService {
         }
 
         logger.info("User devices BEFORE clearing for user {}: {}", username, user.getUserDevices());
-        // Clear existing devices from the user's collection and add new ones
-        user.getUserDevices().clear(); // Clear the collection in memory
+        user.getUserDevices().clear();
         logger.info("User devices AFTER clearing for user {}: {}", username, user.getUserDevices());
 
         if (onboardingRequestDto.getDiabeticDevices() != null) {
@@ -134,13 +127,12 @@ public class UserServiceImpl implements UserService {
                 device.setCategory(deviceDto.getCategory().name());
                 device.setManufacturer(deviceDto.getBrand());
                 device.setModel(deviceDto.getModel());
-                user.getUserDevices().add(device); // Add to the collection
-                device.setUser(user); // Set the parent user
+                user.getUserDevices().add(device);
+                device.setUser(user);
             }
         }
         logger.info("User devices AFTER adding new devices for user {}: {}", username, user.getUserDevices());
 
-        // Logic to set hasDetails flag based on user role and provided data
         boolean hasAllPatientDetails = false;
         if (user.getRole() == Role.PATIENT) {
             if (onboardingRequestDto.getFirstName() != null && !onboardingRequestDto.getFirstName().trim().isEmpty() &&
@@ -152,12 +144,11 @@ public class UserServiceImpl implements UserService {
                 onboardingRequestDto.getDiabetesType() != null &&
                 onboardingRequestDto.getLongActingInsulin() != null && !onboardingRequestDto.getLongActingInsulin().trim().isEmpty() &&
                 onboardingRequestDto.getShortActingInsulin() != null && !onboardingRequestDto.getShortActingInsulin().trim().isEmpty() &&
-                onboardingRequestDto.getDiabeticDevices() != null) { // diabeticDevices can be an empty list, but not null
+                onboardingRequestDto.getDiabeticDevices() != null) {
                 hasAllPatientDetails = true;
             }
             user.getFlags().setHasDetails(hasAllPatientDetails);
         } else {
-            // For PROVIDER and GUARDIAN, set hasDetails to true as per instruction
             user.getFlags().setHasDetails(true);
         }
 
@@ -174,7 +165,6 @@ public class UserServiceImpl implements UserService {
         return new FullUserProfileDto(user);
     }
 
-    // Other methods remain unchanged...
     @Override
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream()
@@ -193,7 +183,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(patientEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + patientEmail));
 
-        // Generate a 6-digit numeric code
+        // Invalidate all existing active codes for this user
+        List<AccessCode> activeCodes = accessCodeRepository.findAllByUserAndExpirationTimeAfter(user, LocalDateTime.now());
+        if (!activeCodes.isEmpty()) {
+            accessCodeRepository.deleteAll(activeCodes);
+        }
+
         String code = String.format("%06d", new Random().nextInt(1000000));
 
         AccessCode accessCode = new AccessCode();
@@ -211,9 +206,73 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(patientEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + patientEmail));
 
-        return accessCodeRepository.findByUserIdAndExpirationTimeAfter(user.getId(), LocalDateTime.now())
-                .map(AccessCode::getCode)
-                .orElse(null);
+        List<AccessCode> activeCodes = accessCodeRepository.findAllByUserAndExpirationTimeAfter(user, LocalDateTime.now());
+        if (activeCodes.isEmpty()) {
+            return null;
+        }
+        // Return the first active code found
+        return activeCodes.get(0).getCode();
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminUserDto> getAllUsersForAdmin() {
+        return userRepository.findAll().stream()
+                .map(AdminUserDto::fromUser)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        if (user.getRole() == Role.ADMIN) {
+            throw new BadRequestException("Admins cannot be deleted via this endpoint.");
+        }
+
+        userRepository.delete(user);
+    }
+
+    @Override
+    @Transactional
+    public AdminUserDto updateUserAsAdmin(Long userId, AdminUpdateUserDto updateUserDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
+
+        // Prevent changing an admin's role
+        if (user.getRole() == Role.ADMIN && StringUtils.hasText(updateUserDto.getRole()) && !user.getRole().name().equals(updateUserDto.getRole().toUpperCase())) {
+            throw new BadRequestException("The role of an admin cannot be changed.");
+        }
+
+        if (StringUtils.hasText(updateUserDto.getFirstName())) {
+            user.setFirstName(updateUserDto.getFirstName());
+        }
+
+        if (StringUtils.hasText(updateUserDto.getLastName())) {
+            user.setLastName(updateUserDto.getLastName());
+        }
+
+        if (StringUtils.hasText(updateUserDto.getRole())) {
+            try {
+                Role newRole = Role.valueOf(updateUserDto.getRole().toUpperCase());
+                user.setRole(newRole);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Invalid role specified: " + updateUserDto.getRole());
+            }
+        }
+
+        User updatedUser = userRepository.save(user);
+        return AdminUserDto.fromUser(updatedUser);
     }
 
     private UserDto fromUser(User user) {

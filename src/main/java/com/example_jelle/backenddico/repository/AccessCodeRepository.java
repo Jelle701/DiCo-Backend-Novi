@@ -1,7 +1,10 @@
 package com.example_jelle.backenddico.repository;
 
 import com.example_jelle.backenddico.model.AccessCode;
+import com.example_jelle.backenddico.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -9,13 +12,14 @@ import java.util.Optional;
  * It provides standard CRUD operations and custom query methods for finding valid access codes.
  */
 public interface AccessCodeRepository extends JpaRepository<AccessCode, Long> {
+
     /**
-     * Finds an active access code for a specific user ID that has not yet expired.
-     * @param userId The ID of the user.
+     * Finds all active access codes for a specific user that have not yet expired.
+     * @param user The user entity to search by.
      * @param now The current time to check against the expiration time.
-     * @return An Optional containing the AccessCode if a valid one is found.
+     * @return A list of active AccessCode entities for the given user.
      */
-    Optional<AccessCode> findByUserIdAndExpirationTimeAfter(Long userId, java.time.LocalDateTime now);
+    List<AccessCode> findAllByUserAndExpirationTimeAfter(User user, LocalDateTime now);
 
     /**
      * Finds an active access code by its code string, ensuring it has not expired.
@@ -23,5 +27,5 @@ public interface AccessCodeRepository extends JpaRepository<AccessCode, Long> {
      * @param now The current time to check against the expiration time.
      * @return An Optional containing the AccessCode if a valid one is found.
      */
-    Optional<AccessCode> findByCodeAndExpirationTimeAfter(String code, java.time.LocalDateTime now);
+    Optional<AccessCode> findByCodeAndExpirationTimeAfter(String code, LocalDateTime now);
 }

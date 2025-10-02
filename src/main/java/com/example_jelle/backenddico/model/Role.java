@@ -16,5 +16,9 @@ public enum Role {
     /**
      * A healthcare provider, who can view data for multiple linked patients.
      */
-    PROVIDER
+    PROVIDER,
+    /**
+     * An administrator with full access to the system.
+     */
+    ADMIN
 }
