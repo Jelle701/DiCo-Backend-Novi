@@ -5,8 +5,8 @@ import com.example_jelle.backenddico.model.Role;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.model.UserFlags;
 import com.example_jelle.backenddico.model.UserProfile;
-import com.example_jelle.backenddico.model.enums.DiabetesType;
 import com.example_jelle.backenddico.model.enums.DeviceCategory;
+import com.example_jelle.backenddico.model.enums.DiabetesType;
 import com.example_jelle.backenddico.model.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -31,8 +31,7 @@ public class FullUserProfileDto {
     private String shortActingInsulin;
     private List<DeviceDto> diabeticDevices;
     private UserFlags flags;
-    private FullUserProfileDto linkedPatientProfile; // For GUARDIAN
-    private List<FullUserProfileDto> linkedPatients; // For PROVIDER
+    private List<FullUserProfileDto> linkedPatients; // Unified list
 
     public FullUserProfileDto() {
     }
@@ -62,15 +61,10 @@ public class FullUserProfileDto {
                     .collect(Collectors.toList());
         }
 
-        // Populate linked patient for GUARDIAN
-        if (user.getRole() == Role.GUARDIAN && user.getLinkedPatient() != null) {
-            this.linkedPatientProfile = new FullUserProfileDto(user.getLinkedPatient(), true);
-        }
-
-        // Populate linked patients for PROVIDER
-        if (user.getRole() == Role.PROVIDER && user.getLinkedPatients() != null && !user.getLinkedPatients().isEmpty()) {
+        // UNIFIED logic for both GUARDIAN and PROVIDER
+        if ((user.getRole() == Role.GUARDIAN || user.getRole() == Role.PROVIDER) && user.getLinkedPatients() != null && !user.getLinkedPatients().isEmpty()) {
             this.linkedPatients = user.getLinkedPatients().stream()
-                    .map(patient -> new FullUserProfileDto(patient, true))
+                    .map(patient -> new FullUserProfileDto(patient, true)) // Use the recursive-safe constructor
                     .collect(Collectors.toList());
         }
     }
@@ -100,11 +94,9 @@ public class FullUserProfileDto {
                     .map(device -> new DeviceDto(DeviceCategory.valueOf(device.getCategory()), device.getManufacturer(), device.getModel()))
                     .collect(Collectors.toList());
         }
-        // For nested DTOs, we do NOT populate the linked patient fields to avoid recursion.
     }
 
-    // Getters and Setters for all fields, including new ones
-
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getEmail() { return email; }
@@ -133,8 +125,6 @@ public class FullUserProfileDto {
     public void setDiabeticDevices(List<DeviceDto> diabeticDevices) { this.diabeticDevices = diabeticDevices; }
     public UserFlags getFlags() { return flags; }
     public void setFlags(UserFlags flags) { this.flags = flags; }
-    public FullUserProfileDto getLinkedPatientProfile() { return linkedPatientProfile; }
-    public void setLinkedPatientProfile(FullUserProfileDto linkedPatientProfile) { this.linkedPatientProfile = linkedPatientProfile; }
     public List<FullUserProfileDto> getLinkedPatients() { return linkedPatients; }
     public void setLinkedPatients(List<FullUserProfileDto> linkedPatients) { this.linkedPatients = linkedPatients; }
 }

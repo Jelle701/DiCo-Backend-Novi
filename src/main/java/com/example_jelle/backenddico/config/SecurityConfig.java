@@ -1,5 +1,6 @@
 package com.example_jelle.backenddico.config;
 
+import com.example_jelle.backenddico.exception.CustomAccessDeniedHandler;
 import com.example_jelle.backenddico.security.JwtUtil;
 import com.example_jelle.backenddico.security.JwtRequestFilter;
 import com.example_jelle.backenddico.service.CustomUserDetailsService;
@@ -32,23 +33,23 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    // Constructor now only depends on JwtUtil, breaking the cycle with UserDetailsService.
-    public SecurityConfig(JwtUtil jwtUtil) {
+    public SecurityConfig(JwtUtil jwtUtil, CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtUtil = jwtUtil;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
     public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder, CustomUserDetailsService userDetailsService) {
         var auth = new DaoAuthenticationProvider();
         auth.setPasswordEncoder(passwordEncoder);
-        auth.setUserDetailsService(userDetailsService); // userDetailsService is now injected here.
+        auth.setUserDetailsService(userDetailsService);
         return new ProviderManager(auth);
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService userDetailsService) throws Exception {
-        // The filter is now created inside the method, using the injected UserDetailsService.
         JwtRequestFilter jwtRequestFilter = new JwtRequestFilter(jwtUtil, userDetailsService);
 
         http
@@ -62,6 +63,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(exceptions -> exceptions.accessDeniedHandler(customAccessDeniedHandler)) // This line activates our custom handler
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

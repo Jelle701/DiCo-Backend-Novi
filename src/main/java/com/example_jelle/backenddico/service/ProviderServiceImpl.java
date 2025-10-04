@@ -59,12 +59,12 @@ public class ProviderServiceImpl implements ProviderService {
         User patient = code.getUser();
         logger.info("Access code is valid and belongs to patient: {}", patient.getUsername());
 
-        if (user.getRole() == Role.PROVIDER) {
-            logger.info("Linking patient {} to provider {}.", patient.getUsername(), user.getUsername());
+        // Unified logic for both GUARDIAN and PROVIDER
+        if (user.getRole() == Role.PROVIDER || user.getRole() == Role.GUARDIAN) {
+            logger.info("Linking patient {} to user {}.", patient.getUsername(), user.getUsername());
             user.getLinkedPatients().add(patient);
-        } else if (user.getRole() == Role.GUARDIAN) {
-            logger.info("Linking patient {} to guardian {}.", patient.getUsername(), user.getUsername());
-            user.setLinkedPatient(patient);
+        } else {
+            throw new InvalidAccessException("User does not have the required role to link a patient.");
         }
 
         userRepository.save(user);

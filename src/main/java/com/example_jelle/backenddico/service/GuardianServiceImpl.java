@@ -13,46 +13,25 @@ import java.time.LocalDateTime;
 
 /**
  * This service implements the logic for guardian-related actions, specifically for linking a guardian to a patient.
+ * @deprecated This logic has been unified into ProviderServiceImpl. This class is now obsolete.
  */
 @Service
+@Deprecated
 public class GuardianServiceImpl implements GuardianService {
 
-    private final UserRepository userRepository;
-    private final AccessCodeRepository accessCodeRepository;
-
-    public GuardianServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository) {
-        this.userRepository = userRepository;
-        this.accessCodeRepository = accessCodeRepository;
+    public GuardianServiceImpl() {
+        // This service is deprecated and should not be used.
     }
 
     /**
-     * Links a guardian to a patient using a valid access code.
-     * It performs several checks: finds the guardian, ensures they are not already linked,
-     * validates the access code, and then establishes the link.
-     * @param guardianUsername The username of the guardian.
-     * @param accessCode The access code provided by the patient.
-     * @throws UserNotFoundException if the guardian is not found.
-     * @throws InvalidAccessException if the guardian is already linked or the access code is invalid/expired.
+     * @deprecated All linking logic is now handled by ProviderServiceImpl#linkPatient.
      */
     @Override
     @Transactional
+    @Deprecated
     public void linkPatient(String guardianUsername, String accessCode) {
-        // 1. Find the guardian
-        User guardian = userRepository.findByUsername(guardianUsername)
-                .orElseThrow(() -> new UserNotFoundException("Guardian not found: " + guardianUsername));
-
-        // 2. Validate that the guardian is not already linked
-        if (guardian.getLinkedPatient() != null) {
-            throw new InvalidAccessException("Guardian is already linked to a patient.");
-        }
-
-        // 3. Find the patient via the access code
-        AccessCode code = accessCodeRepository.findByCodeAndExpirationTimeAfter(accessCode, LocalDateTime.now())
-                .orElseThrow(() -> new InvalidAccessException("Access code is invalid or expired."));
-        User patient = code.getUser();
-
-        // 4. Link the patient to the guardian and save
-        guardian.setLinkedPatient(patient);
-        userRepository.save(guardian);
+        // This method is deprecated and its logic has been moved to ProviderServiceImpl.
+        // It is left empty to resolve compilation errors.
+        throw new UnsupportedOperationException("This method is deprecated. Use ProviderService instead.");
     }
 }

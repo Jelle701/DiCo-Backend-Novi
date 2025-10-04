@@ -26,6 +26,20 @@ public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
+     * Handles authorization failures (AccessDeniedException) from any layer, including @PreAuthorize.
+     * This ensures a consistent JSON error response for all 403 Forbidden errors.
+     * @param ex The exception instance.
+     * @param request The web request.
+     * @return A ResponseEntity with a 403 FORBIDDEN status and a clear error message.
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<MessageResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
+        logger.warn("Access Denied: {}. Request: {}", ex.getMessage(), request.getDescription(false));
+        MessageResponse messageResponse = new MessageResponse("Access Denied: You do not have the required role to perform this action.");
+        return new ResponseEntity<>(messageResponse, HttpStatus.FORBIDDEN);
+    }
+
+    /**
      * Handles the UserNotFoundException.
      * @param ex The exception instance.
      * @param request The web request.
@@ -71,19 +85,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<MessageResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         MessageResponse messageResponse = new MessageResponse(ex.getMessage());
         return new ResponseEntity<>(messageResponse, HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * Handles authorization failures (AccessDeniedException).
-     * This catches cases where a user is authenticated but lacks the necessary permissions for an action.
-     * @param ex The exception instance.
-     * @param request The web request.
-     * @return A ResponseEntity with a 403 FORBIDDEN status and a clear error message.
-     */
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<MessageResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
-        MessageResponse messageResponse = new MessageResponse("Access Denied: You do not have permission to perform this action.");
-        return new ResponseEntity<>(messageResponse, HttpStatus.FORBIDDEN);
     }
 
     /**
