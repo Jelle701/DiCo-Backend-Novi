@@ -1,18 +1,22 @@
 package com.example_jelle.backenddico.controller;
 
+import com.example_jelle.backenddico.dto.diabetes.DiabetesSummaryDto;
 import com.example_jelle.backenddico.dto.guardian.LinkPatientRequestDto;
 import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
 import com.example_jelle.backenddico.dto.provider.PatientDashboardSummaryDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
+import com.example_jelle.backenddico.exception.InvalidAccessException;
 import com.example_jelle.backenddico.service.ProviderService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This controller handles provider-specific actions, such as linking to patient accounts
@@ -100,5 +104,26 @@ public class ProviderController {
         String providerUsername = authentication.getName();
         PatientDashboardSummaryDto summary = providerService.getPatientDashboardSummary(providerUsername, patientId);
         return ResponseEntity.ok(summary);
+    }
+
+    /**
+     * Retrieves the diabetes summary for a specific patient, accessible only by a linked provider.
+     * @param authentication The authentication object for the current provider.
+     * @param patientId The ID of the patient whose summary is being requested.
+     * @return A ResponseEntity containing the DiabetesSummaryDto.
+     */
+    @GetMapping("/patients/{patientId}/diabetes-summary")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<DiabetesSummaryDto> getPatientDiabetesSummary(
+            Authentication authentication,
+            @PathVariable Long patientId) {
+        String providerUsername = authentication.getName();
+        DiabetesSummaryDto summary = providerService.getDiabetesSummaryForPatient(providerUsername, patientId);
+        return ResponseEntity.ok(summary);
+    }
+
+    @ExceptionHandler(InvalidAccessException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidAccess(InvalidAccessException ex) {
+        return new ResponseEntity<>(Map.of("message", ex.getMessage()), HttpStatus.FORBIDDEN);
     }
 }

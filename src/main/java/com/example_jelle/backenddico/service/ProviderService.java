@@ -1,9 +1,12 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.diabetes.DiabetesSummaryDto;
 import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
 import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.provider.PatientDashboardSummaryDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
+import com.example_jelle.backenddico.dto.GlucoseMeasurementDto; // Import the DTO
+
 import java.util.List;
 
 /**
@@ -48,4 +51,20 @@ public interface ProviderService {
      * @return A PatientDashboardSummaryDto containing the summary for the specific patient.
      */
     PatientDashboardSummaryDto getPatientDashboardSummary(String providerUsername, Long patientId);
+
+    /**
+     * Retrieves all glucose measurements for a specific patient, but only if the requesting user is linked to them.
+     * @param requestingUsername The username of the GUARDIAN or PROVIDER.
+     * @param patientId The ID of the patient whose measurements are being requested.
+     * @return A list of GlucoseMeasurementDto objects.
+     */
+    List<GlucoseMeasurementDto> getGlucoseMeasurementsForPatient(String requestingUsername, Long patientId);
+
+    /**
+     * Retrieves the diabetes summary for a specific patient, but only if the requesting provider is linked to them.
+     * @param providerUsername The username of the PROVIDER.
+     * @param patientId The ID of the patient whose summary is being requested.
+     * @return A DiabetesSummaryDto containing the calculated summary.
+     */
+    DiabetesSummaryDto getDiabetesSummaryForPatient(String providerUsername, Long patientId);
 }

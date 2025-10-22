@@ -10,7 +10,7 @@ import com.example_jelle.backenddico.model.HealthData;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.HealthDataRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
-import lombok.AllArgsConstructor;
+// import lombok.AllArgsConstructor; // Tijdelijk verwijderd
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -20,25 +20,22 @@ import java.util.stream.Collectors;
 
 /**
  * This service implements the logic for saving and retrieving user health data.
- * It handles different types of health data, such as steps and heart rate,
- * and provides a summary of recent activity.
  */
 @Service
-@AllArgsConstructor
+// @AllArgsConstructor // Tijdelijk verwijderd
 public class HealthDataServiceImpl implements HealthDataService {
 
     private final UserRepository userRepository;
     private final HealthDataRepository healthDataRepository;
     private final GlucoseMeasurementService glucoseMeasurementService;
 
-    /**
-     * Saves health data points from a request for a specific user.
-     * It iterates through the data points (e.g., steps, heart rate) in the request
-     * and persists them individually, linked to the user.
-     * @param username The username of the user whose data is being saved.
-     * @param healthDataRequest The request object containing lists of health data points.
-     * @throws UnauthorizedException if the user is not found.
-     */
+    // Handmatige constructor om Lombok te omzeilen
+    public HealthDataServiceImpl(UserRepository userRepository, HealthDataRepository healthDataRepository, GlucoseMeasurementService glucoseMeasurementService) {
+        this.userRepository = userRepository;
+        this.healthDataRepository = healthDataRepository;
+        this.glucoseMeasurementService = glucoseMeasurementService;
+    }
+
     @Override
     public void saveHealthData(String username, HealthDataRequest healthDataRequest) {
         User user = userRepository.findByUsername(username)
@@ -67,13 +64,6 @@ public class HealthDataServiceImpl implements HealthDataService {
         }
     }
 
-    /**
-     * Retrieves a summary of health data for a specific user.
-     * This includes a 7-day history of daily steps and the latest recorded heart rate.
-     * @param username The username of the user.
-     * @return A HealthDataResponse DTO containing the summarized data.
-     * @throws UnauthorizedException if the user is not found.
-     */
     @Override
     public HealthDataResponse getHealthDataSummary(String username) {
         User user = userRepository.findByUsername(username)

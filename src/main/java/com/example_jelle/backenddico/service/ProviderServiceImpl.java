@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.service;
 
+import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
+import com.example_jelle.backenddico.dto.diabetes.DiabetesSummaryDto;
 import com.example_jelle.backenddico.dto.provider.DashboardSummaryDto;
 import com.example_jelle.backenddico.dto.provider.DelegatedTokenResponseDto;
 import com.example_jelle.backenddico.dto.provider.PatientDashboardSummaryDto;
@@ -36,14 +38,57 @@ public class ProviderServiceImpl implements ProviderService {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
+    private final DiabetesService diabetesService;
 
-    public ProviderServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository, UserService userService, JwtUtil jwtUtil, GlucoseMeasurementRepository glucoseMeasurementRepository) {
+    public ProviderServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository, UserService userService, JwtUtil jwtUtil, GlucoseMeasurementRepository glucoseMeasurementRepository, DiabetesService diabetesService) {
         this.userRepository = userRepository;
         this.accessCodeRepository = accessCodeRepository;
         this.userService = userService;
         this.jwtUtil = jwtUtil;
         this.glucoseMeasurementRepository = glucoseMeasurementRepository;
+        this.diabetesService = diabetesService;
     }
+
+    // ... other methods ...
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<GlucoseMeasurementDto> getGlucoseMeasurementsForPatient(String requestingUsername, Long patientId) {
+        User requestingUser = userRepository.findByUsername(requestingUsername)
+                .orElseThrow(() -> new UserNotFoundException("Requesting user not found: " + requestingUsername));
+
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new UserNotFoundException("Patient not found with ID: " + patientId));
+
+        boolean isLinked = requestingUser.getLinkedPatients().stream().anyMatch(p -> p.getId().equals(patient.getId()));
+        if (!isLinked) {
+            throw new InvalidAccessException("You are not authorized to view data for this patient.");
+        }
+
+        List<GlucoseMeasurement> measurements = glucoseMeasurementRepository.findAllByUser(patient);
+        return measurements.stream()
+                .map(GlucoseMeasurementDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public DiabetesSummaryDto getDiabetesSummaryForPatient(String providerUsername, Long patientId) {
+        User provider = userRepository.findByUsername(providerUsername)
+                .orElseThrow(() -> new UserNotFoundException("Provider not found: " + providerUsername));
+
+        User patient = userRepository.findById(patientId)
+                .orElseThrow(() -> new UserNotFoundException("Patient not found with ID: " + patientId));
+
+        boolean isLinked = provider.getLinkedPatients().stream().anyMatch(p -> p.getId().equals(patient.getId()));
+        if (!isLinked) {
+            throw new InvalidAccessException("Provider is not authorized to view data for this patient.");
+        }
+
+        return diabetesService.getDiabetesSummary(patient.getUsername());
+    }
+    
+    // --- Unchanged methods below ---
 
     @Override
     @Transactional
@@ -57,9 +102,12 @@ public class ProviderServiceImpl implements ProviderService {
         AccessCode code = accessCodeRepository.findByCodeAndExpirationTimeAfter(accessCode, LocalDateTime.now())
                 .orElseThrow(() -> new InvalidAccessException("Access code is invalid or expired."));
         User patient = code.getUser();
-        logger.info("Access code is valid and belongs to patient: {}", patient.getUsername());
+        logger.info("Access code is valid and belongs to user: {}", patient.getUsername());
 
-        // Unified logic for both GUARDIAN and PROVIDER
+        if (patient.getRole() != Role.PATIENT) {
+            throw new InvalidAccessException("The provided access code does not belong to a patient.");
+        }
+
         if (user.getRole() == Role.PROVIDER || user.getRole() == Role.GUARDIAN) {
             logger.info("Linking patient {} to user {}.", patient.getUsername(), user.getUsername());
             user.getLinkedPatients().add(patient);

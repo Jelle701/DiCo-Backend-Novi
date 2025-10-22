@@ -1,15 +1,12 @@
 package com.example_jelle.backenddico.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -48,6 +45,9 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserProfile userProfile;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private MedicalProfile medicalProfile;
+
     @Column(name = "secret_user_key")
     private String verificationCode;
     private LocalDateTime verificationCodeExpires;
@@ -65,10 +65,15 @@ public class User {
     private Set<User> linkedPatients = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference
     private List<GlucoseMeasurement> glucoseMeasurements = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<UserDevice> userDevices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<UserServiceConnection> serviceConnections = new HashSet<>();
 
     // Getters and Setters
 
@@ -108,6 +113,23 @@ public class User {
     public void setGlucoseMeasurements(List<GlucoseMeasurement> glucoseMeasurements) { this.glucoseMeasurements = glucoseMeasurements; }
     public List<UserDevice> getUserDevices() { return userDevices; }
     public void setUserDevices(List<UserDevice> userDevices) { this.userDevices = userDevices; }
+    public Set<UserServiceConnection> getServiceConnections() { return serviceConnections; }
+    public void setServiceConnections(Set<UserServiceConnection> serviceConnections) { this.serviceConnections = serviceConnections; }
+
+    public Optional<MedicalProfile> getMedicalProfile() {
+        return Optional.ofNullable(medicalProfile);
+    }
+
+    public void setMedicalProfile(MedicalProfile medicalProfile) {
+        if (medicalProfile == null) {
+            if (this.medicalProfile != null) {
+                this.medicalProfile.setUser(null);
+            }
+        } else {
+            medicalProfile.setUser(this);
+        }
+        this.medicalProfile = medicalProfile;
+    }
 
     public void addGlucoseMeasurement(GlucoseMeasurement measurement) {
         this.glucoseMeasurements.add(measurement);

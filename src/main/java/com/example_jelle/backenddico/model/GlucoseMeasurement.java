@@ -1,5 +1,6 @@
 package com.example_jelle.backenddico.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -8,7 +9,10 @@ import java.time.LocalDateTime;
  * It stores the glucose value and the precise timestamp of the measurement.
  */
 @Entity
-@Table(name = "glucose_measurements")
+@Table(name = "glucose_measurements",
+       uniqueConstraints = {
+           @UniqueConstraint(columnNames = {"user_id", "timestamp", "source"})
+       })
 public class GlucoseMeasurement {
 
     /**
@@ -23,6 +27,7 @@ public class GlucoseMeasurement {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     /**
@@ -36,6 +41,20 @@ public class GlucoseMeasurement {
      */
     @Column(nullable = false)
     private LocalDateTime timestamp;
+
+    /**
+     * The type of measurement (e.g., fasting, postprandial).
+     */
+    @Enumerated(EnumType.STRING)
+    private MeasurementType measurementType;
+
+    /**
+     * The source of the measurement (e.g., manual input, LibreView sync).
+     * Defaults to MANUAL for existing records.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) DEFAULT 'MANUAL'")
+    private MeasurementSource source = MeasurementSource.MANUAL;
 
     // Getters and Setters
     public Long getId() {
@@ -68,5 +87,21 @@ public class GlucoseMeasurement {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public MeasurementType getMeasurementType() {
+        return measurementType;
+    }
+
+    public void setMeasurementType(MeasurementType measurementType) {
+        this.measurementType = measurementType;
+    }
+
+    public MeasurementSource getSource() {
+        return source;
+    }
+
+    public void setSource(MeasurementSource source) {
+        this.source = source;
     }
 }

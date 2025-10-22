@@ -2,6 +2,8 @@ package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.model.Role;
 import com.example_jelle.backenddico.model.User;
+import com.example_jelle.backenddico.repository.UserRepository;
+import com.example_jelle.backenddico.security.CustomUserDetails;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,17 +17,17 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserService userService;
+    private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserService userService) {
-        this.userService = userService;
+    public CustomUserDetailsService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        String lowerCaseUsername = username.toLowerCase();
-        User user = userService.findByUsername(lowerCaseUsername)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        String lowerCaseEmail = email.toLowerCase();
+        User user = userRepository.findByEmail(lowerCaseEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         List<GrantedAuthority> authorities = new ArrayList<>();
         Role userRole = user.getRole();
@@ -38,14 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority("ROLE_" + Role.PROVIDER.name()));
         }
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
-                user.getPassword(),
-                user.isEnabled(),
-                true,
-                true,
-                true,
-                authorities
-        );
+        // Return our custom UserDetails object that includes the user ID
+        return new CustomUserDetails(user, authorities);
     }
 }

@@ -1,5 +1,7 @@
 package com.example_jelle.backenddico.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
 import com.example_jelle.backenddico.service.UserService;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/profile")
 public class ProfileController {
 
+    private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
+
     private final UserService userService;
 
     public ProfileController(UserService userService) {
@@ -30,9 +34,11 @@ public class ProfileController {
      * @return A ResponseEntity containing the user's FullUserProfileDto.
      */
     @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()") // SECURED: Allow any authenticated user
     public ResponseEntity<FullUserProfileDto> getMyProfile(Authentication authentication) {
         String userEmail = authentication.getName();
-        FullUserProfileDto userProfile = userService.getFullUserProfile(userEmail);
+        logger.info("GET /api/profile/me called by user: {} with authorities: {}", userEmail, authentication.getAuthorities());
+        FullUserProfileDto userProfile = userService.findByUsernameWithAllDetails(userEmail); // Use new method
         return ResponseEntity.ok(userProfile);
     }
 
@@ -43,7 +49,7 @@ public class ProfileController {
      * @param onboardingData The DTO containing the profile details to be saved.
      * @return A ResponseEntity containing the updated FullUserProfileDto.
      */
-    @PutMapping("/details")
+    @PutMapping({"/me", "/details"})
     @PreAuthorize("hasAnyRole('PATIENT', 'PROVIDER', 'GUARDIAN')") // SECURED: Users with PATIENT, PROVIDER, or GUARDIAN roles can submit onboarding details.
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(
             Authentication authentication,
@@ -51,7 +57,9 @@ public class ProfileController {
 
         String userEmail = authentication.getName();
         userService.saveProfileDetails(userEmail, onboardingData);
-        FullUserProfileDto updatedProfile = userService.getFullUserProfile(userEmail);
+        
+        // Re-fetch the user from the database to ensure the returned profile is up-to-date and fully initialized.
+        FullUserProfileDto updatedProfile = userService.findByUsernameWithAllDetails(userEmail); // Use new method
         return ResponseEntity.ok(updatedProfile);
     }
 }

@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # De Spring Boot applicatie
+  app:
+    build: .
+    container_name: dico-backend
+    restart: unless-stopped
+    ports:
+      # Map poort 8081 van de NAS naar poort 8080 in de container
+      # We gebruiken 8081 omdat 8080 al door de NAS zelf wordt gebruikt
+      - "8081:8080"
+    depends_on:
+      - db
+    environment:
+      # Database connectie instellingen
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/dico
+      - POSTGRES_DB=dico
+      - POSTGRES_USER=dico
+      # VERANDER DIT WACHTWOORD!
+      - POSTGRES_PASSWORD=jouw_sterke_database_wachtwoord
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # JWT Secret - VERANDER DIT OOK!
+      - DICO_JWT_SECRET=verander_dit_naar_een_heel_lang_en_willekeurig_geheim
+
+  # De PostgreSQL database
+  db:
+    image: postgres:15
+    container_name: dico-postgres-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=dico
+      - POSTGRES_USER=dico
+      # Gebruik HETZELFDE wachtwoord als hierboven
+      - POSTGRES_PASSWORD=jouw_sterke_database_wachtwoord
+    volumes:
+      # Deze regel zorgt ervoor dat je databasegegevens bewaard blijven
+      # als je de container opnieuw opstart.
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

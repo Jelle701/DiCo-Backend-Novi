@@ -7,7 +7,7 @@ package com.example_jelle.backenddico.payload.request;
 public class AuthenticationRequest {
 
     /**
-     * The username (typically the user's email) for authentication.
+     * The user's username (which is their email) for authentication.
      */
     private String username;
     /**

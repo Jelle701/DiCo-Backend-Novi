@@ -3,6 +3,7 @@ package com.example_jelle.backenddico;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * This is the main entry point for the Backend Dico Spring Boot application.
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * and other key Spring Boot features.
  */
 @SpringBootApplication
+@EnableScheduling
 public class BackendDicoApplication {
 
     /**

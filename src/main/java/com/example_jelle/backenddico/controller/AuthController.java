@@ -46,23 +46,23 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-        // FIXED: Convert username to lower case to ensure case-insensitivity
-        String username = authenticationRequest.getUsername().toLowerCase();
+        // FINAL FIX: Changed getUsername() back to getEmail() to match the DTO
+        String email = authenticationRequest.getUsername().toLowerCase();
         String password = authenticationRequest.getPassword();
 
-        logger.info("Authentication attempt for username: {}", username);
+        logger.info("Authentication attempt for email: {}", email);
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(username, password)
+                    new UsernamePasswordAuthenticationToken(email, password)
             );
         } catch (BadCredentialsException e) {
-            logger.warn("Authentication failed for username: {}", username);
-            throw new Exception("Incorrect username or password", e);
+            logger.warn("Authentication failed for email: {}", email);
+            throw new Exception("Incorrect email or password", e);
         }
 
-        logger.info("Authentication successful for username: {}", username);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        logger.info("Authentication successful for email: {}", email);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         final String jwt = jwtUtil.generateToken(userDetails);
 
         return ResponseEntity.ok(new AuthenticationResponse(jwt));
@@ -84,7 +84,7 @@ public class AuthController {
      * @param verifyRequest The request body containing the verification token.
      * @return A ResponseEntity with a success message.
      */
-    @PostMapping("/verify-email")
+    @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyRequest verifyRequest) {
         userService.verifyUser(verifyRequest);
         return ResponseEntity.ok(new MessageResponse("User verified successfully! You can now log in."));

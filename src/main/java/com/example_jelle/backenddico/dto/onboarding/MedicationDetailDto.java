@@ -8,16 +8,16 @@ public class MedicationDetailDto {
     /**
      * The manufacturer of the medication.
      */
-    private String fabrikant;
+    private String manufacturer;
     /**
      * The brand name of the medication.
      */
-    private String merknaam;
+    private String brandName;
 
     // Getters and Setters
-    public String getFabrikant() { return fabrikant; }
-    public void setFabrikant(String fabrikant) { this.fabrikant = fabrikant; }
+    public String getManufacturer() { return manufacturer; }
+    public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }
 
-    public String getMerknaam() { return merknaam; }
-    public void setMerknaam(String merknaam) { this.merknaam = merknaam; }
+    public String getBrandName() { return brandName; }
+    public void setBrandName(String brandName) { this.brandName = brandName; }
 }

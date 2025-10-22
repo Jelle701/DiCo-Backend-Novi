@@ -11,6 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,32 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    /**
+     * Handles exceptions related to external service authentication, like LibreView.
+     * This is often caused by incorrect user-provided credentials.
+     * @param ex The SecurityException instance.
+     * @return A ResponseEntity with a 401 UNAUTHORIZED status and a clear error message.
+     */
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<MessageResponse> handleSecurityException(SecurityException ex) {
+        logger.warn("Security exception occurred, likely due to bad credentials for an external service: {}", ex.getMessage());
+        MessageResponse messageResponse = new MessageResponse(ex.getMessage());
+        return new ResponseEntity<>(messageResponse, HttpStatus.UNAUTHORIZED);
+    }
+
+    /**
+     * Handles exceptions thrown by controllers that are already designed to produce a specific HTTP status.
+     * This ensures that the intended status and message are preserved and sent to the client.
+     * @param ex The ResponseStatusException instance.
+     * @return A ResponseEntity with the original status and error message from the exception.
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<MessageResponse> handleResponseStatusException(ResponseStatusException ex) {
+        logger.warn("Controller-level exception: {} - {}", ex.getStatusCode(), ex.getReason());
+        MessageResponse messageResponse = new MessageResponse(ex.getReason());
+        return new ResponseEntity<>(messageResponse, ex.getStatusCode());
+    }
 
     /**
      * Handles authorization failures (AccessDeniedException) from any layer, including @PreAuthorize.

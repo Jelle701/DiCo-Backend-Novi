@@ -2,6 +2,7 @@ package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
 import com.example_jelle.backenddico.dto.AdminUserDto;
+import com.example_jelle.backenddico.dto.ServiceStatusDto;
 import com.example_jelle.backenddico.dto.onboarding.DeviceDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
@@ -24,6 +25,7 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,15 +37,19 @@ public class UserServiceImpl implements UserService {
     private final UserProfileRepository userProfileRepository;
     private final AccessCodeRepository accessCodeRepository;
     private final UserDeviceRepository userDeviceRepository;
+    private final UserServiceConnectionRepository connectionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ActivityService activityService;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, AccessCodeRepository accessCodeRepository, UserDeviceRepository userDeviceRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, AccessCodeRepository accessCodeRepository, UserDeviceRepository userDeviceRepository, UserServiceConnectionRepository connectionRepository, PasswordEncoder passwordEncoder, ActivityService activityService) {
         this.userRepository = userRepository;
         this.userProfileRepository = userProfileRepository;
         this.accessCodeRepository = accessCodeRepository;
         this.userDeviceRepository = userDeviceRepository;
+        this.connectionRepository = connectionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.activityService = activityService;
     }
 
     @Override
@@ -64,6 +70,7 @@ public class UserServiceImpl implements UserService {
         user.setVerificationCodeExpires(LocalDateTime.now().plusHours(24));
         logger.info("Generated verification code for {}: {}", user.getEmail(), verificationCode);
         userRepository.save(user);
+        activityService.createActivity(ActivityType.USER_REGISTRATION, "Nieuwe gebruiker '" + user.getEmail() + "' heeft zich geregistreerd.");
     }
 
     @Override
@@ -140,7 +147,7 @@ public class UserServiceImpl implements UserService {
                 onboardingRequestDto.getDateOfBirth() != null &&
                 onboardingRequestDto.getGender() != null &&
                 onboardingRequestDto.getHeight() > 0 &&
-                onboardingRequestDto.getWeight() > 0 &&
+                onboardingRequestDto.getWeight() > 0 && // Corrected from onboardingRequestDto.Weight
                 onboardingRequestDto.getDiabetesType() != null &&
                 onboardingRequestDto.getLongActingInsulin() != null && !onboardingRequestDto.getLongActingInsulin().trim().isEmpty() &&
                 onboardingRequestDto.getShortActingInsulin() != null && !onboardingRequestDto.getShortActingInsulin().trim().isEmpty() &&
@@ -240,6 +247,7 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("Admins cannot be deleted via this endpoint.");
         }
 
+        activityService.createActivity(ActivityType.USER_DELETION, "User '" + user.getEmail() + "' was deleted by an admin.");
         userRepository.delete(user);
     }
 
@@ -265,7 +273,10 @@ public class UserServiceImpl implements UserService {
         if (StringUtils.hasText(updateUserDto.getRole())) {
             try {
                 Role newRole = Role.valueOf(updateUserDto.getRole().toUpperCase());
-                user.setRole(newRole);
+                if (user.getRole() != newRole) {
+                    activityService.createActivity(ActivityType.ROLE_CHANGE, "The role of '" + user.getEmail() + "' was changed to " + newRole.name());
+                    user.setRole(newRole);
+                }
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Invalid role specified: " + updateUserDto.getRole());
             }
@@ -275,6 +286,25 @@ public class UserServiceImpl implements UserService {
         return AdminUserDto.fromUser(updatedUser);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ServiceStatusDto> getServiceConnectionStatuses(User user) {
+        // Fetch connections directly from the repository to ensure the session is active
+        Set<UserServiceConnection> connections = connectionRepository.findByUser(user);
+        Map<ServiceName, UserServiceConnection> connectionsMap = connections.stream()
+                .collect(Collectors.toMap(UserServiceConnection::getServiceName, Function.identity()));
+
+        return Arrays.stream(ServiceName.values())
+                .map(serviceName -> {
+                    if (connectionsMap.containsKey(serviceName)) {
+                        return ServiceStatusDto.fromConnection(connectionsMap.get(serviceName));
+                    } else {
+                        return ServiceStatusDto.disconnected(serviceName);
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
     private UserDto fromUser(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
@@ -282,5 +312,13 @@ public class UserServiceImpl implements UserService {
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole().name());
         return dto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public FullUserProfileDto findByUsernameWithAllDetails(String username) {
+        User user = userRepository.findByUsernameWithAllDetails(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+        return new FullUserProfileDto(user);
     }
 }

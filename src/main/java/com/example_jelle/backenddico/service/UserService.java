@@ -2,6 +2,7 @@ package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
 import com.example_jelle.backenddico.dto.AdminUserDto;
+import com.example_jelle.backenddico.dto.ServiceStatusDto;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.UserDto;
 import com.example_jelle.backenddico.payload.request.RegisterRequest;
@@ -95,4 +96,18 @@ public interface UserService {
      * @return The updated user details as an AdminUserDto.
      */
     AdminUserDto updateUserAsAdmin(Long userId, AdminUpdateUserDto updateUserDto);
+
+    /**
+     * Retrieves the status of all external service connections for a user.
+     * @param user The user for whom to retrieve the statuses.
+     * @return A list of ServiceStatusDto objects.
+     */
+    List<ServiceStatusDto> getServiceConnectionStatuses(User user);
+
+    /**
+     * Retrieves a comprehensive profile for a user, ensuring all lazy-loaded collections are fetched.
+     * @param username The username of the user to retrieve.
+     * @return A FullUserProfileDto.
+     */
+    FullUserProfileDto findByUsernameWithAllDetails(String username);
 }
