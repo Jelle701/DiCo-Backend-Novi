@@ -37,7 +37,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-        String email = authenticationRequest.getUsername().toLowerCase();
+        String email = authenticationRequest.getEmail().toLowerCase();
         String password = authenticationRequest.getPassword();
 
         logger.info("Authentication attempt for email: {}", email);

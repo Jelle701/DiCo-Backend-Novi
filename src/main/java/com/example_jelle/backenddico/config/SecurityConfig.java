@@ -49,11 +49,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(PasswordEncoder passwordEncoder, CustomUserDetailsService userDetailsService) {
-        var auth = new DaoAuthenticationProvider();
-        auth.setPasswordEncoder(passwordEncoder);
-        auth.setUserDetailsService(userDetailsService);
-        return new ProviderManager(auth);
+    public AuthenticationManager authenticationManager(CustomUserDetailsService uds,
+                                                       PasswordEncoder enc) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(uds);
+        provider.setPasswordEncoder(enc);
+        return new ProviderManager(provider);
     }
 
     @Bean
@@ -64,20 +65,24 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // Permit OPTIONS for all paths (CORS preflight) - MUST BE FIRST
+                        // 1) Preflight eerst
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // Permit all requests to /api/auth/** - making it even broader
+
+                        // 2) Auth-endpoints volledig open
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Permit POST to /api/access/grant
-                        .requestMatchers(HttpMethod.POST, "/api/access/grant").permitAll()
-                        // All other requests to /api/libre/** must be authenticated
+
+                        // 3) (optioneel) health/docs open
+                        .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
+
+                        // 4) Alles van Libre moet ingelogd
                         .requestMatchers("/api/libre/**").authenticated()
-                        // All other requests must be authenticated
+
+                        // 5) rest moet ingelogd
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) // Explicitly return 401 for unauthenticated access
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -87,14 +92,18 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-LibreView-Token", "X-LibreView-AccountId"));
-        configuration.setAllowCredentials(true);
+        CorsConfiguration cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(
+            "http://localhost:5173",
+            "https://diabetesconnect.info",
+            "https://www.diabetesconnect.info"
+        ));
+        cfg.setAllowedMethods(List.of("GET","POST","PUT","DELETE","PATCH","OPTIONS"));
+        cfg.setAllowedHeaders(List.of("Authorization","Content-Type","X-LibreView-Token", "X-LibreView-AccountId"));
+        cfg.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", cfg);
         return source;
     }
 }

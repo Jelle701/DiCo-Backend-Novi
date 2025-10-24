@@ -51,6 +51,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             FilterChain chain
     ) throws IOException, ServletException {
 
+        String uri = request.getRequestURI();
+        String method = request.getMethod();
+
+        // Skip auth for public/auth endpoints and preflight
+        if ("OPTIONS".equalsIgnoreCase(method)
+            || uri.startsWith("/api/auth/")
+            || uri.startsWith("/actuator/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         final String authHeader = request.getHeader("Authorization");
         String username = null;
         String jwt = null;
