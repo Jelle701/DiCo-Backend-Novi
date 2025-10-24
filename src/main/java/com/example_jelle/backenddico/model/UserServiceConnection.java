@@ -4,7 +4,7 @@ import com.example_jelle.backenddico.security.crypto.CryptoConverter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * Represents a connection between a user and an external service (e.g., LibreView, Google Fit).
@@ -52,7 +52,7 @@ public class UserServiceConnection {
     private String externalPatientId; // e.g., the patient ID from LibreView
 
     @Column
-    private LocalDateTime lastSync;
+    private ZonedDateTime lastSync;
 
     // Getters and Setters
 
@@ -128,11 +128,11 @@ public class UserServiceConnection {
         this.externalPatientId = externalPatientId;
     }
 
-    public LocalDateTime getLastSync() {
+    public ZonedDateTime getLastSync() {
         return lastSync;
     }
 
-    public void setLastSync(LocalDateTime lastSync) {
+    public void setLastSync(ZonedDateTime lastSync) {
         this.lastSync = lastSync;
     }
 }

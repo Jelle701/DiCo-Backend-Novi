@@ -9,7 +9,7 @@ import com.example_jelle.backenddico.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,7 +69,7 @@ public class GlucoseMeasurementServiceImpl implements GlucoseMeasurementService 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("Gebruiker met e-mail '" + userEmail + "' niet gevonden."));
 
-        LocalDateTime ninetyDaysAgo = LocalDateTime.now().minusDays(90);
+        ZonedDateTime ninetyDaysAgo = ZonedDateTime.now().minusDays(90);
 
         List<GlucoseMeasurement> measurements = measurementRepository.findByUserAndTimestampAfterOrderByTimestampDesc(user, ninetyDaysAgo);
 

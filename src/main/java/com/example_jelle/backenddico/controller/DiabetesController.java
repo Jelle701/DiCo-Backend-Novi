@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/diabetes")
+@RequestMapping("/diabetes")
 public class DiabetesController {
 
     private final DiabetesService diabetesService;

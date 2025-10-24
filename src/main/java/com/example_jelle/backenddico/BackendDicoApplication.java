@@ -5,29 +5,16 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-/**
- * This is the main entry point for the Backend Dico Spring Boot application.
- * The @SpringBootApplication annotation enables auto-configuration, component scanning,
- * and other key Spring Boot features.
- */
 @SpringBootApplication
 @EnableScheduling
 public class BackendDicoApplication {
 
-    /**
-     * The main method that starts the application.
-     * It first loads environment variables from a .env file using the Dotenv library.
-     * These variables are then set as system properties before the Spring application is launched.
-     * This allows for easy configuration of sensitive data like API keys and secrets without
-     * hardcoding them into the source code.
-     *
-     * @param args Command line arguments passed to the application.
-     */
     public static void main(String[] args) {
-        // Load the .env file
+        // Load the .env file from the project root
         Dotenv dotenv = Dotenv.load();
 
-        // Set the properties as system properties BEFORE Spring Boot starts
+        // Set the properties from .env as system properties
+        // Spring Boot will automatically pick them up to resolve placeholders like ${DB_USERNAME}
         dotenv.entries().forEach(entry -> System.setProperty(entry.getKey(), entry.getValue()));
 
         SpringApplication.run(BackendDicoApplication.class, args);

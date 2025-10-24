@@ -14,9 +14,32 @@
     <name>backenddico</name>
     <description>backenddico</description>
     <properties>
-        <java.version>21</java.version>
-        <lombok.version>1.18.30</lombok.version> <!-- Added Lombok version property -->
+        <java.version>23</java.version>
+        <lombok.version>1.18.30</lombok.version>
+        <!-- Explicitly manage plugin versions -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Force newer Mockito version compatible with Java 23 -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-bom</artifactId>
+                <version>5.12.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Force newer Byte Buddy version compatible with Java 23 -->
+            <dependency>
+                <groupId>net.bytebuddy</groupId>
+                <artifactId>byte-buddy</artifactId>
+                <version>1.14.16</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <!-- Spring Boot Starters -->
         <dependency>
@@ -70,6 +93,13 @@
             <version>3.14.0</version>
         </dependency>
 
+        <!-- Apache Commons CSV -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-csv</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
         <!-- Database Driver -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -81,7 +111,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version> <!-- Use version property -->
+            <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
 
@@ -104,7 +134,7 @@
             <scope>test</scope>
         </dependency>
 
-<!--        DIT IS VOOR LIBRE-->
+        <!-- DIT IS VOOR LIBRE-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
@@ -112,33 +142,29 @@
 
     </dependencies>
 
-
-
-    <!--
-        DE SECTIE HIERONDER IS VERWIJDERD
-
-        <repositories>
-            <repository>
-                <id>jitpack.io</id>
-                <url>https://jitpack.io</url>
-            </repository>
-        </repositories>
-    -->
-
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <!-- Removed the <excludes> section for Lombok -->
-                </configuration>
             </plugin>
-            <!-- Explicitly configure maven-compiler-plugin for Lombok -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version> <!-- Use a compatible version -->
                 <configuration>
                     <compilerArgs>
                         <arg>-parameters</arg>

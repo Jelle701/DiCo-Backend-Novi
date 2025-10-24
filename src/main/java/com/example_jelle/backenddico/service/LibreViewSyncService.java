@@ -19,6 +19,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -87,7 +89,7 @@ public class LibreViewSyncService {
                 }
             }
         }
-        connection.setLastSync(LocalDateTime.now());
+        connection.setLastSync(ZonedDateTime.now());
         connectionRepository.save(connection);
         logger.info("Finished historical data import for user: {}", user.getUsername());
     }
@@ -111,17 +113,19 @@ public class LibreViewSyncService {
         return Stream.of(graphData.data().measurement(), graphData.data().amperageMeasurements())
                 .flatMap(list -> list == null ? Stream.empty() : list.stream())
                 .filter(measurement -> {
+                    ZonedDateTime timestamp = measurement.timestamp().atZone(ZoneId.systemDefault());
                     boolean exists = glucoseMeasurementRepository.existsByUserAndTimestampAndSource(
-                            user, measurement.timestamp(), MeasurementSource.LIBREVIEW);
+                            user, timestamp, MeasurementSource.LIBREVIEW);
                     if (exists) {
-                        logger.trace("Skipping duplicate measurement for user {} at {}", user.getUsername(), measurement.timestamp());
+                        logger.trace("Skipping duplicate measurement for user {} at {}", user.getUsername(), timestamp);
                     }
                     return !exists;
                 })
                 .peek(measurement -> {
+                    ZonedDateTime timestamp = measurement.timestamp().atZone(ZoneId.systemDefault());
                     GlucoseMeasurement newMeasurement = new GlucoseMeasurement();
                     newMeasurement.setUser(user);
-                    newMeasurement.setTimestamp(measurement.timestamp());
+                    newMeasurement.setTimestamp(timestamp);
                     newMeasurement.setValue(measurement.value());
                     newMeasurement.setSource(MeasurementSource.LIBREVIEW);
                     glucoseMeasurementRepository.save(newMeasurement);

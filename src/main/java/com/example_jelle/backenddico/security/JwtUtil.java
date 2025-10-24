@@ -63,9 +63,10 @@ public class JwtUtil {
      * @param token The JWT.
      * @return A list of strings representing the scope.
      */
+    @SuppressWarnings("unchecked")
     public List<String> extractScope(String token) {
         final Claims claims = extractAllClaims(token);
-        return claims.get("scope", List.class);
+        return (List<String>) claims.get("scope");
     }
 
     /**
@@ -73,9 +74,10 @@ public class JwtUtil {
      * @param token The JWT.
      * @return A list of strings representing the roles.
      */
+    @SuppressWarnings("unchecked")
     public List<String> extractRoles(String token) {
         final Claims claims = extractAllClaims(token);
-        return claims.get("roles", List.class);
+        return (List<String>) claims.get("roles");
     }
 
     /**

@@ -1,65 +1,65 @@
 package com.example_jelle.backenddico.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.example_jelle.backenddico.dto.user.LibreViewCredentialsRequest;
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
 import com.example_jelle.backenddico.dto.onboarding.OnboardingRequestDto;
+import com.example_jelle.backenddico.exception.UserNotFoundException;
+import com.example_jelle.backenddico.model.User;
+import com.example_jelle.backenddico.repository.UserRepository;
+import com.example_jelle.backenddico.service.LibreViewAuthService;
 import com.example_jelle.backenddico.service.UserService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * This controller manages user profile data.
- * It provides endpoints for the authenticated user to retrieve their own profile
- * and to save or update their profile details (e.g., during onboarding).
- */
 @RestController
-@RequestMapping("/api/profile")
+@RequestMapping("/profile")
 public class ProfileController {
 
     private static final Logger logger = LoggerFactory.getLogger(ProfileController.class);
 
     private final UserService userService;
+    private final UserRepository userRepository;
+    private final LibreViewAuthService libreViewAuthService;
 
-    public ProfileController(UserService userService) {
+    public ProfileController(UserService userService, UserRepository userRepository, LibreViewAuthService libreViewAuthService) {
         this.userService = userService;
+        this.userRepository = userRepository;
+        this.libreViewAuthService = libreViewAuthService;
     }
 
-    /**
-     * Retrieves the profile of the currently authenticated user.
-     * @param authentication The authentication object for the current user.
-     * @return A ResponseEntity containing the user's FullUserProfileDto.
-     */
     @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()") // SECURED: Allow any authenticated user
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FullUserProfileDto> getMyProfile(Authentication authentication) {
         String userEmail = authentication.getName();
-        logger.info("GET /api/profile/me called by user: {} with authorities: {}", userEmail, authentication.getAuthorities());
-        FullUserProfileDto userProfile = userService.findByUsernameWithAllDetails(userEmail); // Use new method
+        logger.info("GET /api/profile/me called by user: {}", userEmail);
+        FullUserProfileDto userProfile = userService.findByUsernameWithAllDetails(userEmail);
         return ResponseEntity.ok(userProfile);
     }
 
-    /**
-     * Saves or updates the profile details for the authenticated user.
-     * This endpoint is secured and can only be accessed by users with the 'PATIENT', 'PROVIDER', or 'GUARDIAN' role.
-     * @param authentication The authentication object for the current user.
-     * @param onboardingData The DTO containing the profile details to be saved.
-     * @return A ResponseEntity containing the updated FullUserProfileDto.
-     */
     @PutMapping({"/me", "/details"})
-    @PreAuthorize("hasAnyRole('PATIENT', 'PROVIDER', 'GUARDIAN')") // SECURED: Users with PATIENT, PROVIDER, or GUARDIAN roles can submit onboarding details.
+    @PreAuthorize("hasAnyRole('PATIENT', 'PROVIDER', 'GUARDIAN')")
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(
             Authentication authentication,
             @Valid @RequestBody OnboardingRequestDto onboardingData) {
-
         String userEmail = authentication.getName();
         userService.saveProfileDetails(userEmail, onboardingData);
-        
-        // Re-fetch the user from the database to ensure the returned profile is up-to-date and fully initialized.
-        FullUserProfileDto updatedProfile = userService.findByUsernameWithAllDetails(userEmail); // Use new method
+        FullUserProfileDto updatedProfile = userService.findByUsernameWithAllDetails(userEmail);
         return ResponseEntity.ok(updatedProfile);
+    }
+
+    @PutMapping("/me/services/libreview")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> saveLibreViewCredentials(Authentication authentication, @Valid @RequestBody LibreViewCredentialsRequest req) {
+        logger.info("Saving LibreView credentials for user: {}", authentication.getName());
+        User user = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new UserNotFoundException("Authenticated user not found."));
+
+        libreViewAuthService.connectOrUpdateLibreView(user, req.getLibreViewEmail(), req.getLibreViewPassword());
+        return ResponseEntity.ok().build();
     }
 }

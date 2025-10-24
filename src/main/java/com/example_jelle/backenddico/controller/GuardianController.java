@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/guardian")
+@RequestMapping("/guardian")
 public class GuardianController {
 
     private final ProviderService providerService;
@@ -50,7 +50,6 @@ public class GuardianController {
         return ResponseEntity.ok(measurements);
     }
 
-    // DEBUGGING STEP: Changed the URL from '/diabetes-summary' to '/summary-report' to avoid potential caching issues.
     @GetMapping("/linked-patients/{patientId}/summary-report")
     @PreAuthorize("hasAuthority('ROLE_GUARDIAN')")
     public ResponseEntity<DiabetesSummaryDto> getPatientDiabetesSummary(

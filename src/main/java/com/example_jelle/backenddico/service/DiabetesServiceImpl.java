@@ -5,18 +5,13 @@ import com.example_jelle.backenddico.exception.DataNotFoundException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
 import com.example_jelle.backenddico.model.MeasurementType;
-import com.example_jelle.backenddico.model.MedicalProfile;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class DiabetesServiceImpl implements DiabetesService {
@@ -34,7 +29,7 @@ public class DiabetesServiceImpl implements DiabetesService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException("User not found: " + username));
 
-        LocalDateTime ninetyDaysAgo = LocalDateTime.now().minusDays(90);
+        ZonedDateTime ninetyDaysAgo = ZonedDateTime.now().minusDays(90);
         List<GlucoseMeasurement> allMeasurements = glucoseMeasurementRepository.findByUserAndTimestampAfterOrderByTimestampDesc(user, ninetyDaysAgo);
 
         if (allMeasurements.isEmpty()) {
@@ -53,10 +48,10 @@ public class DiabetesServiceImpl implements DiabetesService {
         summary.setCvPct(calculateCvPct(allMeasurements));
 
         // Get FPG and PPG
-        glucoseMeasurementRepository.findFirstByUserAndMeasurementTypeOrderByTimestampDesc(user, MeasurementType.FPG)
+        glucoseMeasurementRepository.findFirstByUserAndMeasurementTypeOrderByTimestampDesc(user, MeasurementType.HISTORIC) // Assuming FPG is historic
                 .ifPresent(m -> summary.setFpg(new ValueUnitDto<>(m.getValue(), "mmol/L")));
 
-        glucoseMeasurementRepository.findFirstByUserAndMeasurementTypeOrderByTimestampDesc(user, MeasurementType.PPG)
+        glucoseMeasurementRepository.findFirstByUserAndMeasurementTypeOrderByTimestampDesc(user, MeasurementType.SCANNED) // Assuming PPG is scanned
                 .ifPresent(m -> summary.setPpg(new PpgDto(m.getValue(), "mmol/L", 120))); // Assuming 120 minutes
 
         // Get data from MedicalProfile
@@ -69,13 +64,13 @@ public class DiabetesServiceImpl implements DiabetesService {
         });
 
         // Set updatedAt
-        summary.setUpdatedAt(allMeasurements.get(0).getTimestamp().toInstant(ZoneOffset.UTC));
+        summary.setUpdatedAt(allMeasurements.get(0).getTimestamp().toInstant());
 
         return summary;
     }
 
     private AvgGlucoseDto calculateAvgGlucose(List<GlucoseMeasurement> measurements) {
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now();
         Double avg7d = calculateAverageForPeriod(measurements, now.minusDays(7));
         Double avg14d = calculateAverageForPeriod(measurements, now.minusDays(14));
         Double avg30d = calculateAverageForPeriod(measurements, now.minusDays(30));
@@ -85,7 +80,7 @@ public class DiabetesServiceImpl implements DiabetesService {
         return new AvgGlucoseDto("mmol/L", values);
     }
 
-    private Double calculateAverageForPeriod(List<GlucoseMeasurement> measurements, LocalDateTime startDate) {
+    private Double calculateAverageForPeriod(List<GlucoseMeasurement> measurements, ZonedDateTime startDate) {
         return measurements.stream()
                 .filter(m -> !m.getTimestamp().isBefore(startDate))
                 .mapToDouble(GlucoseMeasurement::getValue)

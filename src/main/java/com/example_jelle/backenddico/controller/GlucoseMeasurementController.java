@@ -5,36 +5,24 @@ import com.example_jelle.backenddico.service.GlucoseMeasurementService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize; // Belangrijke import
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * This controller handles operations related to glucose measurements.
- * It provides endpoints for adding new measurements and retrieving recent measurements
- * for the authenticated user. Access is restricted to authenticated users.
- */
 @RestController
-@RequestMapping("/api/glucose")
+@RequestMapping("/glucose")
 public class GlucoseMeasurementController {
 
     private final GlucoseMeasurementService measurementService;
 
-    public GlucoseMeasurementController(GlucoseMeasurementService measurementService) { // Corrected constructor name
+    public GlucoseMeasurementController(GlucoseMeasurementService measurementService) {
         this.measurementService = measurementService;
     }
 
-    /**
-     * Adds a new glucose measurement for the authenticated user.
-     * The user must have the 'PATIENT' role.
-     * @param authentication The authentication object for the current user.
-     * @param measurementDto The DTO containing the details of the glucose measurement.
-     * @return A ResponseEntity containing the saved GlucoseMeasurementDto with HTTP status 201 CREATED.
-     */
     @PostMapping
-    @PreAuthorize("hasRole('PATIENT')") // Aangepast van 'USER' naar 'PATIENT'
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<GlucoseMeasurementDto> addGlucoseMeasurement(
             Authentication authentication,
             @Valid @RequestBody GlucoseMeasurementDto measurementDto) {
@@ -45,14 +33,8 @@ public class GlucoseMeasurementController {
         return new ResponseEntity<>(savedDto, HttpStatus.CREATED);
     }
 
-    /**
-     * Retrieves recent glucose measurements for the authenticated user.
-     * The user must have the 'PATIENT' role.
-     * @param authentication The authentication object for the current user.
-     * @return A ResponseEntity containing a list of recent GlucoseMeasurementDto objects.
-     */
     @GetMapping
-    @PreAuthorize("hasRole('PATIENT')") // Consistentie: ook hier de juiste rol vereisen
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<List<GlucoseMeasurementDto>> getRecentGlucoseMeasurements(Authentication authentication) {
         String userEmail = authentication.getName();
         List<GlucoseMeasurementDto> measurements = measurementService.getRecentMeasurements(userEmail);

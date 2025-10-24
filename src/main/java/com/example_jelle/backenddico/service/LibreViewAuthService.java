@@ -16,7 +16,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 @Service
@@ -48,7 +48,7 @@ public class LibreViewAuthService {
         connection.setAccessToken(authResult.token());
         connection.setExternalUserId(authResult.userId());
         connection.setExternalPatientId(authResult.patientId());
-        connection.setLastSync(LocalDateTime.now());
+        connection.setLastSync(ZonedDateTime.now());
 
         connectionRepository.save(connection);
         logger.info("Successfully connected and stored LibreView credentials for user: {}", user.getUsername());
@@ -64,7 +64,7 @@ public class LibreViewAuthService {
         connection.setAccessToken(authResult.token());
         connection.setExternalUserId(authResult.userId());
         connection.setExternalPatientId(authResult.patientId());
-        connection.setLastSync(LocalDateTime.now());
+        connection.setLastSync(ZonedDateTime.now());
 
         connectionRepository.save(connection);
         logger.info("Successfully re-authenticated and stored new token for user: {}", connection.getUser().getUsername());

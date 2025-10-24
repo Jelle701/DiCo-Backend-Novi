@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -175,7 +175,7 @@ public class ProviderServiceImpl implements ProviderService {
             throw new InvalidAccessException("Provider is not linked to this patient.");
         }
 
-        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        ZonedDateTime sevenDaysAgo = ZonedDateTime.now().minusDays(7);
         List<GlucoseMeasurement> recentMeasurements = glucoseMeasurementRepository.findByUserAndTimestampAfterOrderByTimestampDesc(patient, sevenDaysAgo);
 
         if (recentMeasurements.isEmpty()) {
@@ -195,7 +195,7 @@ public class ProviderServiceImpl implements ProviderService {
         boolean hasAlerts = recentMeasurements.stream()
                 .anyMatch(m -> m.getValue() < 3.9 || m.getValue() > 13.9);
 
-        Instant lastSyncTimestamp = recentMeasurements.get(0).getTimestamp().toInstant(ZoneOffset.UTC);
+        Instant lastSyncTimestamp = recentMeasurements.get(0).getTimestamp().toInstant();
 
         SummaryStatsDto summaryStats = new SummaryStatsDto(averageGlucose, timeInRangePercentage);
 

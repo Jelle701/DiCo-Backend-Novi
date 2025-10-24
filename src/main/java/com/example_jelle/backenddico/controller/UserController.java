@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -26,11 +26,6 @@ public class UserController {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Retrieves the status of all external service connections for the currently authenticated user.
-     * @param currentUser The details of the authenticated user.
-     * @return A list of service statuses.
-     */
     @GetMapping("/me/services")
     public ResponseEntity<List<ServiceStatusDto>> getMyServiceConnections(@AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = userRepository.findById(currentUser.getId())

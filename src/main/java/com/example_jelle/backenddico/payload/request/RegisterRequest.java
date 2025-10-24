@@ -1,18 +1,23 @@
 package com.example_jelle.backenddico.payload.request;
 
-/**
- * This class is a Data Transfer Object (DTO) for user registration requests.
- * It contains the essential fields (email and password) needed to create a new user account.
- */
+import com.example_jelle.backenddico.model.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class RegisterRequest {
-    /**
-     * The email address for the new account.
-     */
+
+    @NotBlank
+    @Email
     private String email;
-    /**
-     * The password for the new account.
-     */
+
+    @NotBlank
+    @Size(min = 6, max = 40)
     private String password;
+
+    @NotNull
+    private Role role;
 
     public String getEmail() {
         return email;
@@ -28,5 +33,13 @@ public class RegisterRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

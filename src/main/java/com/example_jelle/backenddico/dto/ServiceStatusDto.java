@@ -3,7 +3,7 @@ package com.example_jelle.backenddico.dto;
 import com.example_jelle.backenddico.model.ServiceName;
 import com.example_jelle.backenddico.model.UserServiceConnection;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /**
  * A DTO to represent the status of a user's connection to an external service.
@@ -13,9 +13,9 @@ public class ServiceStatusDto {
     private ServiceName serviceName;
     private boolean isConnected;
     private String email; // The email associated with the service connection
-    private LocalDateTime lastSync;
+    private ZonedDateTime lastSync;
 
-    public ServiceStatusDto(ServiceName serviceName, boolean isConnected, String email, LocalDateTime lastSync) {
+    public ServiceStatusDto(ServiceName serviceName, boolean isConnected, String email, ZonedDateTime lastSync) {
         this.serviceName = serviceName;
         this.isConnected = isConnected;
         this.email = email;
@@ -63,11 +63,11 @@ public class ServiceStatusDto {
         this.email = email;
     }
 
-    public LocalDateTime getLastSync() {
+    public ZonedDateTime getLastSync() {
         return lastSync;
     }
 
-    public void setLastSync(LocalDateTime lastSync) {
+    public void setLastSync(ZonedDateTime lastSync) {
         this.lastSync = lastSync;
     }
 }

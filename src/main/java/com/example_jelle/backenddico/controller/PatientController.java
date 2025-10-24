@@ -14,13 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * This controller handles patient-specific operations.
- * It provides endpoints to retrieve a patient's profile, generate a new access code,
- * and retrieve the currently active access code for the authenticated patient.
- */
 @RestController
-@RequestMapping("/api/patient") // Changed base path
+@RequestMapping("/patient")
 public class PatientController {
 
     private final UserService userService;
@@ -29,47 +24,28 @@ public class PatientController {
         this.userService = userService;
     }
 
-    /**
-     * Retrieves the full profile of a specific patient by their username.
-     * @param username The username of the patient.
-     * @return A ResponseEntity containing the patient's FullUserProfileDto.
-     */
-    // Existing endpoint, adjusted path
-    @GetMapping("/{username}/profile") // Adjusted path
-    @PreAuthorize("hasRole('PATIENT') or hasRole('PROVIDER') or hasRole('GUARDIAN')") // Assuming other roles might view patient profiles
+    @GetMapping("/{username}/profile")
+    @PreAuthorize("hasRole('PATIENT') or hasRole('PROVIDER') or hasRole('GUARDIAN')")
     public ResponseEntity<FullUserProfileDto> getPatientProfile(@PathVariable String username) {
         FullUserProfileDto userProfile = userService.getFullUserProfile(username);
         return ResponseEntity.ok(userProfile);
     }
 
-    /**
-     * Generates a new access code for the authenticated patient.
-     * This code can be used by guardians or providers to link to the patient's account.
-     * @param authentication The authentication object for the current user.
-     * @return A ResponseEntity containing the newly generated AccessCodeDto.
-     */
-    // New endpoint: Generate Access Code
     @PostMapping("/access-code/generate")
-    @PreAuthorize("hasRole('PATIENT')") // SECURED: Only PATIENT role can generate access codes.
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<AccessCodeDto> generateAccessCode(Authentication authentication) {
         String patientEmail = authentication.getName();
-        String newAccessCode = userService.generateAccessCode(patientEmail); // Assuming this method exists in UserService
+        String newAccessCode = userService.generateAccessCode(patientEmail);
         return ResponseEntity.ok(new AccessCodeDto(newAccessCode));
     }
 
-    /**
-     * Retrieves the currently active access code for the authenticated patient.
-     * @param authentication The authentication object for the current user.
-     * @return A ResponseEntity containing the active AccessCodeDto, or 404 NOT FOUND if no active access code is found.
-     */
-    // New endpoint: Get Access Code
     @GetMapping("/access-code")
-    @PreAuthorize("hasRole('PATIENT')") // SECURED: Only PATIENT role can retrieve their own access code.
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<AccessCodeDto> getAccessCode(Authentication authentication) {
         String patientEmail = authentication.getName();
-        String activeAccessCode = userService.getAccessCode(patientEmail); // Assuming this method exists in UserService
+        String activeAccessCode = userService.getAccessCode(patientEmail);
         if (activeAccessCode == null) {
-            return ResponseEntity.notFound().build(); // Changed to return 404 without throwing an exception
+            return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(new AccessCodeDto(activeAccessCode));
     }

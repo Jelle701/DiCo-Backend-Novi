@@ -19,7 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -62,9 +63,6 @@ public class LibreViewSyncTask {
             try {
                 logger.info("--- Processing connection for user: {} ---", user.getUsername());
 
-                String token = connection.getAccessToken();
-                String userId = connection.getExternalUserId();
-
                 // 1. Try to fetch data with the stored token.
                 LluConnectionsResponse patientConnections = fetchDataWithToken(connection);
 
@@ -104,7 +102,7 @@ public class LibreViewSyncTask {
                         logger.info("Saved {} new measurements for user {} from patientId {}.", savedCount, user.getUsername(), patient.patientId());
                     }
                 }
-                connection.setLastSync(LocalDateTime.now());
+                connection.setLastSync(ZonedDateTime.now());
                 connectionRepository.save(connection);
 
             } catch (Exception e) {
@@ -136,13 +134,14 @@ public class LibreViewSyncTask {
         return Stream.of(graphData.data().measurement(), graphData.data().amperageMeasurements())
             .flatMap(list -> list == null ? Stream.empty() : list.stream())
             .mapToInt(measurement -> {
+                ZonedDateTime timestamp = measurement.timestamp().atZone(ZoneId.systemDefault());
                 boolean exists = glucoseMeasurementRepository.existsByUserAndTimestampAndSource(
-                    user, measurement.timestamp(), MeasurementSource.LIBREVIEW);
+                    user, timestamp, MeasurementSource.LIBREVIEW);
 
                 if (!exists) {
                     GlucoseMeasurement newMeasurement = new GlucoseMeasurement();
                     newMeasurement.setUser(user);
-                    newMeasurement.setTimestamp(measurement.timestamp());
+                    newMeasurement.setTimestamp(timestamp);
                     newMeasurement.setValue(measurement.value());
                     newMeasurement.setSource(MeasurementSource.LIBREVIEW);
                     glucoseMeasurementRepository.save(newMeasurement);

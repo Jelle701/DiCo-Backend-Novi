@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admin")
+@RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
@@ -21,33 +21,18 @@ public class AdminController {
         this.userService = userService;
     }
 
-    /**
-     * Retrieves a list of all users for the admin dashboard.
-     * @return A ResponseEntity containing a list of AdminUserDto objects.
-     */
     @GetMapping("/users")
     public ResponseEntity<List<AdminUserDto>> getAllUsers() {
         List<AdminUserDto> users = userService.getAllUsersForAdmin();
         return ResponseEntity.ok(users);
     }
 
-    /**
-     * Deletes a user by their ID.
-     * @param userId The ID of the user to delete.
-     * @return A ResponseEntity with a confirmation message.
-     */
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long userId) {
         userService.deleteUserById(userId);
         return ResponseEntity.ok(Map.of("message", "User with ID " + userId + " deleted successfully."));
     }
 
-    /**
-     * Updates a user's details.
-     * @param userId The ID of the user to update.
-     * @param updateUserDto The DTO containing the fields to update.
-     * @return A ResponseEntity with the updated user details.
-     */
     @PutMapping("/users/{userId}")
     public ResponseEntity<AdminUserDto> updateUser(@PathVariable Long userId, @RequestBody AdminUpdateUserDto updateUserDto) {
         AdminUserDto updatedUser = userService.updateUserAsAdmin(userId, updateUserDto);
