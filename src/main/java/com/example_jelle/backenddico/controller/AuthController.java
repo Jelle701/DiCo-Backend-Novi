@@ -37,36 +37,45 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
-        String email = authenticationRequest.getEmail().toLowerCase();
+        String username = authenticationRequest.getUsername().toLowerCase();
         String password = authenticationRequest.getPassword();
 
-        logger.info("Authentication attempt for email: {}", email);
+        logger.info("Received authentication request for username: {}", username);
+        logger.debug("Password for {}: {}", username, password); // Added for debugging, be careful in production
 
         try {
             authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(email, password)
+                    new UsernamePasswordAuthenticationToken(username, password)
             );
         } catch (BadCredentialsException e) {
-            logger.warn("Authentication failed for email: {}", email);
-            throw new Exception("Incorrect email or password", e);
+            logger.warn("Authentication failed for username: {}. Reason: {}", username, e.getMessage());
+            throw new Exception("Incorrect username or password", e);
         }
 
-        logger.info("Authentication successful for email: {}", email);
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        logger.info("Authentication successful for username: {}", username);
+        final UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new AuthenticationResponse(jwt));
+        AuthenticationResponse response = new AuthenticationResponse(jwt);
+        logger.info("Returning JWT token for user: {}", username);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        logger.info("Received registration request for email: {}", registerRequest.getEmail());
         userService.register(registerRequest);
-        return ResponseEntity.ok(new MessageResponse("User registered successfully! Please check your console for the verification code."));
+        MessageResponse response = new MessageResponse("User registered successfully! Please check your console for the verification code.");
+        logger.info("User registration successful for email: {}.", registerRequest.getEmail());
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyRequest verifyRequest) {
+        logger.info("Received verification request with token: {}", verifyRequest.getToken());
         userService.verifyUser(verifyRequest);
-        return ResponseEntity.ok(new MessageResponse("User verified successfully! You can now log in."));
+        MessageResponse response = new MessageResponse("User verified successfully! You can now log in.");
+        logger.info("User verification successful for token: {}", verifyRequest.getToken());
+        return ResponseEntity.ok(response);
     }
 }

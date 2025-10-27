@@ -69,13 +69,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                         // 2) Auth-endpoints volledig open
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
 
                         // 3) (optioneel) health/docs open
                         .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
                         // 4) Alles van Libre moet ingelogd
-                        .requestMatchers("/api/libre/**").authenticated()
+                        .requestMatchers("/libre/**").authenticated()
 
                         // 5) rest moet ingelogd
                         .anyRequest().authenticated()

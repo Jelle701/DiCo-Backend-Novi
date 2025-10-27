@@ -49,14 +49,14 @@ public class LibreController {
 
     @PostMapping("/login")
     public ResponseEntity<LibreViewSessionResponse> login(@AuthenticationPrincipal CustomUserDetails currentUser, @Valid @RequestBody LluLoginRequest req) {
-        logger.info("Received LibreView login request for user: {}", currentUser.getUsername());
+        logger.info("Received LibreView login request for user: {}, request body: {}", currentUser.getUsername(), req);
         User user = userRepository.findById(currentUser.getId()).orElseThrow(() -> new UserNotFoundException("Authenticated user not found."));
 
         LluAuthResult authResult = authService.connectOrUpdateLibreView(user, req.email(), req.password());
         String accountIdHash = hashUtil.calculateSha256(authResult.userId());
         LibreViewSessionResponse response = new LibreViewSessionResponse(authResult.token(), authResult.userId(), authResult.patientId(), accountIdHash);
 
-        logger.info("Successfully authenticated with LibreView for user: {}. Returning session details.", user.getUsername());
+        logger.info("Successfully authenticated with LibreView for user: {}. Returning session details: {}", user.getUsername(), response);
         return ResponseEntity.ok(response);
     }
 
@@ -71,7 +71,7 @@ public class LibreController {
         String accountIdHash = hashUtil.calculateSha256(authResult.userId());
         LibreViewSessionResponse response = new LibreViewSessionResponse(authResult.token(), authResult.userId(), authResult.patientId(), accountIdHash);
 
-        logger.info("Successfully refreshed LibreView session for user: {}.", user.getUsername());
+        logger.info("Successfully refreshed LibreView session for user: {}. Returning session details: {}", user.getUsername(), response);
         return ResponseEntity.ok(response);
     }
 
@@ -84,10 +84,14 @@ public class LibreController {
     }
 
     private Mono<ResponseEntity<String>> proxyRequest(String method, String uri, String token, String accountIdHash) {
+        logger.info("Proxying request: method={}, uri={}, token={}, accountIdHash={}", method, uri, token, accountIdHash);
         return libreViewClient.method(org.springframework.http.HttpMethod.valueOf(method)).uri(uri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .header("Account-Id", accountIdHash)
-                .exchangeToMono(response -> response.toEntity(String.class));
+                .exchangeToMono(response -> {
+                    logger.info("Received response from proxied request: {}", response.statusCode());
+                    return response.toEntity(String.class);
+                });
     }
 
     @GetMapping("/connections")

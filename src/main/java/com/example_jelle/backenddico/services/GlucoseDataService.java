@@ -11,9 +11,12 @@ import com.example_jelle.backenddico.repository.UserRepository;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -31,6 +34,7 @@ import java.util.List;
 @Service
 public class GlucoseDataService {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlucoseDataService.class);
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
     private final UserRepository userRepository;
 
@@ -39,6 +43,7 @@ public class GlucoseDataService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public int processCsvFile(MultipartFile file) {
         validateFile(file);
 
@@ -125,5 +130,11 @@ public class GlucoseDataService {
         } catch (IllegalArgumentException e) {
             throw new CsvValidationException("Fout op rij " + rowNum + ": Een of meer kolommen ontbreken of zijn onjuist.");
         }
+    }
+
+    @Transactional
+    public void deleteDataForUser(Long userId) {
+        logger.info("Executing deletion of all glucose data records for user ID: {}", userId);
+        glucoseMeasurementRepository.deleteByUserId(userId);
     }
 }

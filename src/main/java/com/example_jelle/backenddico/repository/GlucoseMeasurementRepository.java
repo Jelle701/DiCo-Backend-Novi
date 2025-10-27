@@ -18,4 +18,6 @@ public interface GlucoseMeasurementRepository extends JpaRepository<GlucoseMeasu
     List<GlucoseMeasurement> findByUserAndTimestampAfterOrderByTimestampDesc(User user, ZonedDateTime timestamp);
 
     Optional<GlucoseMeasurement> findFirstByUserAndMeasurementTypeOrderByTimestampDesc(User user, MeasurementType measurementType);
+
+    void deleteByUserId(Long userId);
 }

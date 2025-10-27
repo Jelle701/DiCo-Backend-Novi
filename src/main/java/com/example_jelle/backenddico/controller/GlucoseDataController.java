@@ -22,7 +22,7 @@ public class GlucoseDataController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('PATIENT')")
+    @PreAuthorize("hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<Map<String, String>> uploadGlucoseData(@RequestParam("file") MultipartFile file) {
         int measurementsAdded = glucoseDataService.processCsvFile(file);
         String message = String.format("Bestand succesvol verwerkt. %d metingen zijn toegevoegd.", measurementsAdded);
