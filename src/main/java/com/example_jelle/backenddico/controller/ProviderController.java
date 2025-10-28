@@ -71,6 +71,16 @@ public class ProviderController {
         return ResponseEntity.ok(summary);
     }
 
+    // Nieuw endpoint voor /provider/summary
+    @GetMapping("/summary")
+    @PreAuthorize("hasRole('PROVIDER')")
+    public ResponseEntity<DashboardSummaryDto> getProviderSummary(Authentication authentication) {
+        String providerUsername = authentication.getName();
+        // Hergebruik de bestaande service-methode
+        DashboardSummaryDto summary = providerService.getDashboardSummary(providerUsername);
+        return ResponseEntity.ok(summary);
+    }
+
     @GetMapping("/patients/{patientId}/dashboard-summary")
     @PreAuthorize("hasRole('PROVIDER')")
     public ResponseEntity<PatientDashboardSummaryDto> getPatientDashboardSummary(

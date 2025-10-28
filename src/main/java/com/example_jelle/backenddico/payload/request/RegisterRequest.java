@@ -3,7 +3,6 @@ package com.example_jelle.backenddico.payload.request;
 import com.example_jelle.backenddico.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
@@ -16,7 +15,7 @@ public class RegisterRequest {
     @Size(min = 6, max = 40)
     private String password;
 
-    @NotNull
+    // @NotNull removed to make role optional during initial registration
     private Role role;
 
     public String getEmail() {

@@ -148,16 +148,26 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
+    @Transactional(readOnly = true) // Added @Transactional to resolve LazyInitializationException
     public DashboardSummaryDto getDashboardSummary(String providerUsername) {
-        User provider = userRepository.findByUsername(providerUsername)
-                .orElseThrow(() -> new UserNotFoundException("Provider not found: " + providerUsername));
+        logger.info("Attempting to get dashboard summary for provider: {}", providerUsername);
+        User provider = userRepository.findByUsernameWithLinkedPatients(providerUsername) // Use new method
+                .orElseThrow(() -> {
+                    logger.warn("Provider not found: {}", providerUsername);
+                    return new UserNotFoundException("Provider not found: " + providerUsername);
+                });
 
+        logger.debug("Provider found: {}. Fetching linked patients.", provider.getUsername());
+        // Accessing the lazy-loaded collection within a transactional context
         List<User> linkedPatients = provider.getLinkedPatients().stream().collect(Collectors.toList());
+        logger.debug("Found {} linked patients for provider {}.", linkedPatients.size(), provider.getUsername());
 
         int totalPatients = linkedPatients.size();
         int patientsWithHighGlucose = 0;
         int patientsWithLowGlucose = 0;
 
+        // TODO: Implement actual logic to calculate high/low glucose patients based on their data
+        logger.info("Returning placeholder dashboard summary for provider: {}", providerUsername);
         return new DashboardSummaryDto(totalPatients, patientsWithHighGlucose, patientsWithLowGlucose);
     }
 
@@ -188,8 +198,7 @@ public class ProviderServiceImpl implements ProviderService {
                 .orElse(0.0);
 
         long inRangeCount = recentMeasurements.stream()
-                .filter(m -> m.getValue() >= 3.9 && m.getValue() <= 10.0)
-                .count();
+                .filter(m -> m.getValue() >= 3.9 && m.getValue() <= 10.0).count();
         int timeInRangePercentage = (int) Math.round((double) inRangeCount / recentMeasurements.size() * 100);
 
         boolean hasAlerts = recentMeasurements.stream()

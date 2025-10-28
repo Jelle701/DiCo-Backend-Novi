@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -136,5 +137,20 @@ public class GlucoseDataService {
     public void deleteDataForUser(Long userId) {
         logger.info("Executing deletion of all glucose data records for user ID: {}", userId);
         glucoseMeasurementRepository.deleteByUserId(userId);
+    }
+
+    /**
+     * Retrieves all glucose measurements for a user based on their username.
+     * @param username The username (email) of the user.
+     * @return A list of all GlucoseMeasurement objects.
+     */
+    @Transactional(readOnly = true) // readOnly is more efficient for read operations
+    public List<GlucoseMeasurement> findAllByUsername(String username) {
+        // 1. Find the user based on the username
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        // 2. Retrieve all glucose data for the found user ID
+        return glucoseMeasurementRepository.findAllByUserIdOrderByTimestampAsc(user.getId());
     }
 }

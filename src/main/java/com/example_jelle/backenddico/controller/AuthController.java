@@ -10,6 +10,7 @@ import com.example_jelle.backenddico.security.JwtUtil;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -49,7 +50,11 @@ public class AuthController {
             );
         } catch (BadCredentialsException e) {
             logger.warn("Authentication failed for username: {}. Reason: {}", username, e.getMessage());
-            throw new Exception("Incorrect username or password", e);
+            // Return 401 Unauthorized with a generic message to prevent user enumeration
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Ongeldige gebruikersnaam of wachtwoord."));
+        } catch (Exception e) {
+            logger.error("An unexpected error occurred during authentication for username: {}.", username, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Er is een interne serverfout opgetreden."));
         }
 
         logger.info("Authentication successful for username: {}", username);

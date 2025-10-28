@@ -20,4 +20,11 @@ public interface GlucoseMeasurementRepository extends JpaRepository<GlucoseMeasu
     Optional<GlucoseMeasurement> findFirstByUserAndMeasurementTypeOrderByTimestampDesc(User user, MeasurementType measurementType);
 
     void deleteByUserId(Long userId);
+
+    /**
+     * Retrieves all glucose measurements for a specific user, sorted by timestamp (oldest first).
+     * @param userId The ID of the user.
+     * @return A list of GlucoseMeasurement objects.
+     */
+    List<GlucoseMeasurement> findAllByUserIdOrderByTimestampAsc(Long userId);
 }
