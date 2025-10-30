@@ -1,3 +1,4 @@
+// REST controller for guardian-related operations.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
@@ -22,10 +23,12 @@ public class GuardianController {
 
     private final ProviderService providerService;
 
+    // Constructs a new GuardianController.
     public GuardianController(ProviderService providerService) {
         this.providerService = providerService;
     }
 
+    // Links a guardian to a patient using an access code.
     @PostMapping("/link-patient")
     @PreAuthorize("hasAuthority('ROLE_GUARDIAN')")
     public ResponseEntity<Void> linkPatient(Authentication authentication, @Valid @RequestBody LinkPatientRequestDto request) {
@@ -34,6 +37,7 @@ public class GuardianController {
         return ResponseEntity.ok().build();
     }
 
+    // Retrieves a list of patients linked to the authenticated guardian.
     @GetMapping("/linked-patients")
     @PreAuthorize("hasAuthority('ROLE_GUARDIAN')")
     public ResponseEntity<List<FullUserProfileDto>> getLinkedPatients(Authentication authentication) {
@@ -42,6 +46,7 @@ public class GuardianController {
         return ResponseEntity.ok(linkedPatients);
     }
 
+    // Retrieves glucose measurements for a specific patient linked to the authenticated guardian.
     @GetMapping("/linked-patients/{patientId}/glucose-measurements")
     @PreAuthorize("hasAuthority('ROLE_GUARDIAN')")
     public ResponseEntity<List<GlucoseMeasurementDto>> getPatientGlucoseMeasurements(Authentication authentication, @PathVariable Long patientId) {
@@ -50,6 +55,7 @@ public class GuardianController {
         return ResponseEntity.ok(measurements);
     }
 
+    // Retrieves the diabetes summary for a specific patient linked to the authenticated guardian.
     @GetMapping("/linked-patients/{patientId}/summary-report")
     @PreAuthorize("hasAuthority('ROLE_GUARDIAN')")
     public ResponseEntity<DiabetesSummaryDto> getPatientDiabetesSummary(
@@ -60,6 +66,7 @@ public class GuardianController {
         return ResponseEntity.ok(summary);
     }
 
+    // Handles InvalidAccessException.
     @ExceptionHandler(InvalidAccessException.class)
     public ResponseEntity<Map<String, String>> handleInvalidAccess(InvalidAccessException ex) {
         return new ResponseEntity<>(Map.of("message", ex.getMessage()), HttpStatus.FORBIDDEN);

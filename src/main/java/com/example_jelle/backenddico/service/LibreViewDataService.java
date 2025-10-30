@@ -1,3 +1,4 @@
+// Service for fetching data from the LibreView API.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.libre.LluConnectionsResponse;
@@ -20,11 +21,13 @@ public class LibreViewDataService {
     private final WebClient libreViewClient;
     private final HashUtil hashUtil;
 
+    // Constructs a new LibreViewDataService.
     public LibreViewDataService(WebClient libreViewClient, HashUtil hashUtil) {
         this.libreViewClient = libreViewClient;
         this.hashUtil = hashUtil;
     }
 
+    // Fetches the connections from LibreView.
     public LluConnectionsResponse getConnections(String token, String userId) {
         String accountIdHash = hashUtil.calculateSha256(userId);
         logger.info("Fetching connections from LibreView for userId: {} (Hashed Account-Id: {})", userId, accountIdHash);
@@ -38,9 +41,7 @@ public class LibreViewDataService {
                 .block();
     }
 
-    /**
-     * Fetches the latest graph data (typically last 2 weeks).
-     */
+    // Fetches the latest graph data.
     public LluGraphResponse getGraphData(String token, String userId, String targetPatientId) {
         String accountIdHash = hashUtil.calculateSha256(userId);
         logger.info("Fetching latest graph data from LibreView for targetPatientId: {} (using userId: {} for Account-Id hash)", targetPatientId, userId);
@@ -54,12 +55,9 @@ public class LibreViewDataService {
                 .block();
     }
 
-    /**
-     * Fetches graph data for a specific date range, required for historical import.
-     */
+    // Fetches graph data for a specific date range.
     public LluGraphResponse getGraphData(String token, String userId, String targetPatientId, LocalDate startDate, LocalDate endDate) {
         String accountIdHash = hashUtil.calculateSha256(userId);
-        // The API expects the format M/d/yyyy
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("M/d/yyyy");
         String startDateStr = startDate.format(formatter);
         String endDateStr = endDate.format(formatter);

@@ -1,3 +1,4 @@
+// Configuration for the LibreView API client.
 package com.example_jelle.backenddico.config;
 
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ public class LibreViewConfig {
     @Value("${libreview.version:4.16.0}")
     private String version;
 
+    // Creates a WebClient bean for the LibreView API.
     @Bean
     public WebClient libreViewClient(WebClient.Builder builder) {
         HttpClient httpClient = HttpClient.create()
@@ -48,6 +50,7 @@ public class LibreViewConfig {
             .build();
     }
 
+    // Logs the request.
     private ExchangeFilterFunction logRequest() {
         return ExchangeFilterFunction.ofRequestProcessor(req -> {
             logger.info("[LibreView Request] {} {}", req.method(), req.url());
@@ -56,6 +59,7 @@ public class LibreViewConfig {
         });
     }
 
+    // Logs the response.
     private ExchangeFilterFunction logResponse() {
         return ExchangeFilterFunction.ofResponseProcessor(res -> {
             logger.info("[LibreView Response] Status: {}", res.statusCode());

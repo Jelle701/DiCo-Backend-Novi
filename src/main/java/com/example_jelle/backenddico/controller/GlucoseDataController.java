@@ -1,7 +1,8 @@
-package com.example_jelle.backenddico.controller; // CORRECTED PACKAGE
+// REST controller for managing glucose data.
+package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.services.GlucoseDataService;
+import com.example_jelle.backenddico.service.GlucoseDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,33 +17,29 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/data") // Changed from /data/upload/glucose to /data
+@RequestMapping("/data")
 public class GlucoseDataController {
 
     private final GlucoseDataService glucoseDataService;
     private static final Logger logger = LoggerFactory.getLogger(GlucoseDataController.class);
 
+    // Constructs a new GlucoseDataController.
     public GlucoseDataController(GlucoseDataService glucoseDataService) {
         this.glucoseDataService = glucoseDataService;
     }
 
-    @PostMapping("/upload/glucose") // Changed to /upload/glucose
+    // Uploads glucose data from a CSV file.
+    @PostMapping("/upload/glucose")
     @PreAuthorize("hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<Map<String, String>> uploadGlucoseData(@RequestParam("file") MultipartFile file) {
         int measurementsAdded = glucoseDataService.processCsvFile(file);
-        String message = String.format("Bestand succesvol verwerkt. %d metingen zijn toegevoegd.", measurementsAdded);
+        String message = String.format("File successfully processed. %d measurements added.", measurementsAdded);
         return ResponseEntity.ok(Map.of("message", message));
     }
 
-    /**
-     * Endpoint to get ALL glucose data for the logged-in user.
-     * Secured to ensure only the data owner can request it.
-     *
-     * @param userDetails The details of the logged-in user, automatically injected by Spring Security.
-     * @return A ResponseEntity with a list of all glucose measurements.
-     */
+    // Retrieves all glucose data for the logged-in user.
     @GetMapping("/my-glucose-data/all")
-    @PreAuthorize("hasRole('PATIENT')") // Ensures only patients can call this
+    @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<?> getAllMyGlucoseData(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not logged in.");

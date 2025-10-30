@@ -1,13 +1,9 @@
+// Enum representing the gender options for a user profile.
 package com.example_jelle.backenddico.model.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.Arrays;
 
-/**
- * This enum represents the gender options for a user profile.
- * It is designed to handle multiple string representations for each gender (e.g., in different languages)
- * and provides a custom deserializer for flexibility when processing incoming data.
- */
 public enum Gender {
     MALE("Male", "Man"),
     FEMALE("Female", "Vrouw"),
@@ -16,17 +12,12 @@ public enum Gender {
 
     private final String[] values;
 
+    // Constructs a new Gender.
     Gender(String... values) {
         this.values = values;
     }
 
-    /**
-     * This method is a custom deserializer for Jackson (used for JSON processing).
-     * It allows the enum to be created from a string value that matches any of the defined aliases,
-     * ignoring case.
-     * @param value The string value from the incoming JSON.
-     * @return The matching Gender enum constant, or null if no match is found.
-     */
+    // Custom deserializer for Jackson.
     @JsonCreator
     public static Gender fromString(String value) {
         if (value == null) {

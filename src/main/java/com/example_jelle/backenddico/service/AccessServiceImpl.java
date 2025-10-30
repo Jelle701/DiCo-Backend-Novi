@@ -1,3 +1,4 @@
+// Implementation of the AccessService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.access.GrantAccessResponseDto;
@@ -11,29 +12,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-/**
- * This service implements the logic for granting access using an access code.
- * It validates the code and generates a delegated JWT for the user associated with the code.
- */
 @Service
 public class AccessServiceImpl implements AccessService {
 
     private final AccessCodeRepository accessCodeRepository;
     private final JwtUtil jwtUtil;
 
+    // Constructs a new AccessServiceImpl.
     public AccessServiceImpl(AccessCodeRepository accessCodeRepository, JwtUtil jwtUtil) {
         this.accessCodeRepository = accessCodeRepository;
         this.jwtUtil = jwtUtil;
     }
 
-    /**
-     * Grants access based on a provided access code.
-     * It finds a valid, non-expired access code, retrieves the associated patient,
-     * and generates a delegated JWT for that patient.
-     * @param accessCode The access code to validate.
-     * @return A DTO containing the delegated JWT and the patient's username.
-     * @throws InvalidAccessException if the code is invalid or expired.
-     */
+    // Grants access based on a provided access code.
     @Override
     @Transactional(readOnly = true)
     public GrantAccessResponseDto grantAccess(String accessCode) {

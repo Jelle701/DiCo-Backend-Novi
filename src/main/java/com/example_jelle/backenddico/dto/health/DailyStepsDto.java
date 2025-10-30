@@ -1,37 +1,30 @@
+// Data Transfer Object for daily step counts.
 package com.example_jelle.backenddico.dto.health;
-
-// import lombok.Data; // Tijdelijk verwijderd
 
 import java.time.LocalDate;
 
-/**
- * This class is a Data Transfer Object (DTO) for daily step counts.
- * It is used to represent the total number of steps taken on a specific date.
- */
-// @Data // Tijdelijk verwijderd
 public class DailyStepsDto {
-    /**
-     * The date for which the step count is recorded.
-     */
+    // The date for which the step count is recorded.
     private LocalDate date;
-    /**
-     * The total number of steps for the given date.
-     */
+    // The total number of steps for the given date.
     private Integer steps;
 
-    // Handmatige getters en setters
+    // Gets the date.
     public LocalDate getDate() {
         return date;
     }
 
+    // Sets the date.
     public void setDate(LocalDate date) {
         this.date = date;
     }
 
+    // Gets the number of steps.
     public Integer getSteps() {
         return steps;
     }
 
+    // Sets the number of steps.
     public void setSteps(Integer steps) {
         this.steps = steps;
     }

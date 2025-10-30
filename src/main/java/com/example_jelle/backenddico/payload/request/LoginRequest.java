@@ -1,31 +1,21 @@
+// Data Transfer Object for user login requests.
 package com.example_jelle.backenddico.payload.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-/**
- * This class is a Data Transfer Object (DTO) for login requests.
- * It contains the credentials (email and password) submitted by a user during login.
- * Note: The field is named 'email', but the AuthController expects 'username'.
- * This might require an adjustment in the controller or here to ensure consistency.
- */
 public class LoginRequest {
-    /**
-     * The user's email, used as the username for authentication.
-     * This field must not be blank.
-     */
     @NotBlank
     private String email;
 
-    /**
-     * The user's password.
-     * This field must not be blank.
-     */
     @NotBlank
     private String password;
 
-    // Getters and Setters
+    // Gets the user's email.
     public String getEmail() { return email; }
+    // Sets the user's email.
     public void setEmail(String email) { this.email = email; }
+    // Gets the user's password.
     public String getPassword() { return password; }
+    // Sets the user's password.
     public void setPassword(String password) { this.password = password; }
 }

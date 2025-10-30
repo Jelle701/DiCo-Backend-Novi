@@ -1,10 +1,11 @@
+// Implementation of the DiabetesService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.diabetes.*;
 import com.example_jelle.backenddico.exception.DataNotFoundException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.MeasurementType;
+import com.example_jelle.backenddico.model.enums.MeasurementType;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
@@ -19,11 +20,13 @@ public class DiabetesServiceImpl implements DiabetesService {
     private final UserRepository userRepository;
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
 
+    // Constructs a new DiabetesServiceImpl.
     public DiabetesServiceImpl(UserRepository userRepository, GlucoseMeasurementRepository glucoseMeasurementRepository) {
         this.userRepository = userRepository;
         this.glucoseMeasurementRepository = glucoseMeasurementRepository;
     }
 
+    // Retrieves a summary of diabetes data for a user.
     @Override
     public DiabetesSummaryDto getDiabetesSummary(String username) {
         User user = userRepository.findByUsername(username)
@@ -69,6 +72,7 @@ public class DiabetesServiceImpl implements DiabetesService {
         return summary;
     }
 
+    // Calculates the average glucose for different time periods.
     private AvgGlucoseDto calculateAvgGlucose(List<GlucoseMeasurement> measurements) {
         ZonedDateTime now = ZonedDateTime.now();
         Double avg7d = calculateAverageForPeriod(measurements, now.minusDays(7));
@@ -80,6 +84,7 @@ public class DiabetesServiceImpl implements DiabetesService {
         return new AvgGlucoseDto("mmol/L", values);
     }
 
+    // Calculates the average for a given period.
     private Double calculateAverageForPeriod(List<GlucoseMeasurement> measurements, ZonedDateTime startDate) {
         return measurements.stream()
                 .filter(m -> !m.getTimestamp().isBefore(startDate))
@@ -88,6 +93,7 @@ public class DiabetesServiceImpl implements DiabetesService {
                 .orElse(0.0);
     }
 
+    // Calculates the time in range.
     private TimeInRangeDto calculateTimeInRange(List<GlucoseMeasurement> measurements) {
         long total = measurements.size();
         if (total == 0) return new TimeInRangeDto(0, 0, 0);
@@ -103,6 +109,7 @@ public class DiabetesServiceImpl implements DiabetesService {
         );
     }
 
+    // Calculates the coefficient of variation.
     private Double calculateCvPct(List<GlucoseMeasurement> measurements) {
         if (measurements.size() < 2) return 0.0;
 

@@ -1,9 +1,6 @@
+// Enum representing common types of insulin.
 package com.example_jelle.backenddico.model.enums;
 
-/**
- * This enum represents common types of insulin.
- * It includes both long-acting and short-acting varieties.
- */
 public enum InsulinType {
     // Rapid-acting
     HUMALOG,

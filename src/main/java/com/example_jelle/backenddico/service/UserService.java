@@ -1,3 +1,4 @@
+// Interface defining the contract for user-related operations.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
@@ -13,101 +14,46 @@ import com.example_jelle.backenddico.model.User;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * This interface defines the contract for user-related operations.
- * It outlines the methods for user registration, verification, profile management, and access code handling.
- */
 public interface UserService {
-    /**
-     * Retrieves a list of all users.
-     * @return A list of UserDto objects.
-     */
+    // Retrieves a list of all users.
     List<UserDto> getUsers();
 
-    /**
-     * Finds a user by their username.
-     * @param username The username to search for.
-     * @return An Optional containing the User if found.
-     */
+    // Finds a user by their username.
     Optional<User> findByUsername(String username);
 
-    /**
-     * Registers a new user based on the provided registration data.
-     * @param registerRequest The request object containing registration details.
-     */
+    // Registers a new user.
     void register(RegisterRequest registerRequest);
 
-    /**
-     * Verifies a user's account using a verification token.
-     * @param verifyRequest The request object containing the verification token.
-     */
+    // Verifies a user's account using a verification token.
     void verifyUser(VerifyRequest verifyRequest);
 
-    /**
-     * Saves or updates the profile details for a user.
-     * @param username The username of the user to update.
-     * @param onboardingRequestDto The DTO containing the new profile details.
-     */
+    // Saves or updates the profile details for a user.
     void saveProfileDetails(String username, OnboardingRequestDto onboardingRequestDto);
 
-    /**
-     * Retrieves a comprehensive profile for a user.
-     * @param username The username of the user to retrieve.
-     * @return A FullUserProfileDto.
-     */
+    // Retrieves a comprehensive profile for a user.
     FullUserProfileDto getFullUserProfile(String username);
 
-    /**
-     * Generates a new access code for a patient.
-     * @param patientEmail The email of the patient.
-     * @return The generated access code.
-     */
+    // Generates a new access code for a patient.
     String generateAccessCode(String patientEmail);
 
-    /**
-     * Retrieves the currently active access code for a patient.
-     * @param patientEmail The email of the patient.
-     * @return The active access code, or null if not found.
-     */
+    // Retrieves the currently active access code for a patient.
     String getAccessCode(String patientEmail);
 
-    /**
-     * Deletes a user and all associated data.
-     * @param username The username of the user to delete.
-     */
+    // Deletes a user and all associated data.
     void deleteUser(String username);
 
-    /**
-     * Retrieves a list of all users formatted for the admin dashboard.
-     * @return A list of AdminUserDto objects.
-     */
+    // Retrieves a list of all users formatted for the admin dashboard.
     List<AdminUserDto> getAllUsersForAdmin();
 
-    /**
-     * Deletes a user by their ID, for admin purposes.
-     * @param userId The ID of the user to delete.
-     */
+    // Deletes a user by their ID, for admin purposes.
     void deleteUserById(Long userId);
 
-    /**
-     * Updates a user's details as an admin.
-     * @param userId The ID of the user to update.
-     * @param updateUserDto The DTO containing the fields to update.
-     * @return The updated user details as an AdminUserDto.
-     */
+    // Updates a user's details as an admin.
     AdminUserDto updateUserAsAdmin(Long userId, AdminUpdateUserDto updateUserDto);
 
-    /**
-     * Retrieves the status of all external service connections for a user.
-     * @param user The user for whom to retrieve the statuses.
-     * @return A list of ServiceStatusDto objects.
-     */
+    // Retrieves the status of all external service connections for a user.
     List<ServiceStatusDto> getServiceConnectionStatuses(User user);
 
-    /**
-     * Retrieves a comprehensive profile for a user, ensuring all lazy-loaded collections are fetched.
-     * @param username The username of the user to retrieve.
-     * @return A FullUserProfileDto.
-     */
+    // Retrieves a comprehensive profile for a user, ensuring all lazy-loaded collections are fetched.
     FullUserProfileDto findByUsernameWithAllDetails(String username);
 }

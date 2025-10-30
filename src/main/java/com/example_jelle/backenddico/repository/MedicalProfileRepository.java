@@ -1,3 +1,4 @@
+// Repository for MedicalProfile entities.
 package com.example_jelle.backenddico.repository;
 
 import com.example_jelle.backenddico.model.MedicalProfile;

@@ -1,32 +1,27 @@
+// Data Transfer Object for authentication requests.
 package com.example_jelle.backenddico.payload.request;
 
-/**
- * This class is a Data Transfer Object (DTO) for authentication requests.
- * It holds the credentials (username and password) submitted by a user for login.
- */
 public class AuthenticationRequest {
 
-    /**
-     * The user's username (which is their email) for authentication.
-     */
     private String username;
-    /**
-     * The user's password.
-     */
     private String password;
 
+    // Gets the username.
     public String getUsername() {
         return username;
     }
 
+    // Sets the username.
     public void setUsername(String username) {
         this.username = username;
     }
 
+    // Gets the password.
     public String getPassword() {
         return password;
     }
 
+    // Sets the password.
     public void setPassword(String password) {
         this.password = password;
     }

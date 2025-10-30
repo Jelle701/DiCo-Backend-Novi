@@ -1,20 +1,20 @@
+// Data Transfer Object for an access code.
 package com.example_jelle.backenddico.dto.patient;
 
-/**
- * This class is a Data Transfer Object (DTO) for an access code.
- * It is used to send an access code to the client.
- */
 public class AccessCodeDto {
     private String accessCode;
 
+    // Constructs a new AccessCodeDto.
     public AccessCodeDto(String accessCode) {
         this.accessCode = accessCode;
     }
 
+    // Gets the access code.
     public String getAccessCode() {
         return accessCode;
     }
 
+    // Sets the access code.
     public void setAccessCode(String accessCode) {
         this.accessCode = accessCode;
     }

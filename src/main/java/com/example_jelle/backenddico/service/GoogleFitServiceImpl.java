@@ -1,3 +1,4 @@
+// Implementation of the GoogleFitService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.model.GoogleFitToken;
@@ -20,10 +21,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
-/**
- * This service implements the logic for handling the Google Fit API integration.
- * It is responsible for exchanging the authorization code for access and refresh tokens and storing them securely.
- */
 @Service
 public class GoogleFitServiceImpl implements GoogleFitService {
 
@@ -40,19 +37,14 @@ public class GoogleFitServiceImpl implements GoogleFitService {
     private final GoogleFitTokenRepository googleFitTokenRepository;
     private final UserRepository userRepository;
 
+    // Constructs a new GoogleFitServiceImpl.
     public GoogleFitServiceImpl(RestTemplate restTemplate, GoogleFitTokenRepository googleFitTokenRepository, UserRepository userRepository) {
         this.restTemplate = restTemplate;
         this.googleFitTokenRepository = googleFitTokenRepository;
         this.userRepository = userRepository;
     }
 
-    /**
-     * Exchanges a Google authorization code for access and refresh tokens.
-     * It makes a POST request to Google's token endpoint. Upon success, it retrieves the tokens
-     * and persists them for the currently authenticated user. It handles both new token creation
-     * and updates to existing tokens (e.g., refreshing the access token).
-     * @param code The authorization code received from Google's callback.
-     */
+    // Exchanges a Google authorization code for access and refresh tokens.
     @Override
     public void exchangeCodeForTokens(String code) {
         HttpHeaders headers = new HttpHeaders();
@@ -67,7 +59,6 @@ public class GoogleFitServiceImpl implements GoogleFitService {
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
 
-        // Use exchange with ParameterizedTypeReference to handle generic types safely
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
                 TOKEN_URL,
                 HttpMethod.POST,
@@ -97,7 +88,6 @@ public class GoogleFitServiceImpl implements GoogleFitService {
             googleFitTokenRepository.save(googleFitToken);
 
         } else {
-            // TODO: Handle error
             System.err.println("Error exchanging code for tokens: " + response.getStatusCode());
         }
     }

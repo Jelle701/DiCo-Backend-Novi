@@ -1,3 +1,4 @@
+// REST controller for managing activities.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.model.Activity;
@@ -17,10 +18,12 @@ public class ActivityController {
 
     private final ActivityService activityService;
 
+    // Constructs a new ActivityController.
     public ActivityController(ActivityService activityService) {
         this.activityService = activityService;
     }
 
+    // Retrieves a list of recent activities.
     @GetMapping
     public ResponseEntity<List<Activity>> getRecentActivities() {
         List<Activity> activities = activityService.getRecentActivities();

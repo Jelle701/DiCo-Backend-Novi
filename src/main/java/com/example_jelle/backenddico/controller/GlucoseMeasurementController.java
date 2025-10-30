@@ -1,3 +1,4 @@
+// REST controller for managing glucose measurements.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
@@ -17,10 +18,12 @@ public class GlucoseMeasurementController {
 
     private final GlucoseMeasurementService measurementService;
 
+    // Constructs a new GlucoseMeasurementController.
     public GlucoseMeasurementController(GlucoseMeasurementService measurementService) {
         this.measurementService = measurementService;
     }
 
+    // Adds a new glucose measurement for the authenticated user.
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<GlucoseMeasurementDto> addGlucoseMeasurement(
@@ -33,6 +36,7 @@ public class GlucoseMeasurementController {
         return new ResponseEntity<>(savedDto, HttpStatus.CREATED);
     }
 
+    // Retrieves recent glucose measurements for the authenticated user.
     @GetMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<List<GlucoseMeasurementDto>> getRecentGlucoseMeasurements(Authentication authentication) {

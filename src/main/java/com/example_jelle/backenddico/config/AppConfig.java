@@ -1,3 +1,4 @@
+// Application configuration.
 package com.example_jelle.backenddico.config;
 
 import org.springframework.context.annotation.Bean;
@@ -9,6 +10,7 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class AppConfig {
 
+    // Creates a RestTemplate bean.
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();

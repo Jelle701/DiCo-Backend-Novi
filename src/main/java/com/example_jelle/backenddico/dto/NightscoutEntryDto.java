@@ -1,3 +1,4 @@
+// Data Transfer Object for a single glucose entry from a Nightscout-compatible source.
 package com.example_jelle.backenddico.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -6,61 +7,52 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import java.util.Date;
 
-/**
- * This class is a Data Transfer Object (DTO) representing a single glucose entry from a Nightscout-compatible source.
- * The field names are mapped to the JSON properties of the Nightscout API specification.
- */
 public class NightscoutEntryDto {
 
-    /**
-     * The glucose value in mg/dL.
-     */
+    // The glucose value in mg/dL.
     @JsonProperty("sgv")
     private int sgv;
 
-    /**
-     * The timestamp of the reading, provided as epoch milliseconds from the source.
-     */
+    // The timestamp of the reading, provided as epoch milliseconds from the source.
     @JsonProperty("date")
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER) // Nightscout sends date as epoch milliseconds
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Date date;
 
-    /**
-     * The identifier of the device that created the entry (e.g., "nightscout-librelink-up").
-     */
+    // The identifier of the device that created the entry.
     @JsonProperty("device")
     private String device;
 
-    // Getters and Setters
+    // Gets the glucose value.
     public int getSgv() {
         return sgv;
     }
 
+    // Sets the glucose value.
     public void setSgv(int sgv) {
         this.sgv = sgv;
     }
 
+    // Gets the timestamp of the reading.
     public Date getDate() {
         return date;
     }
 
+    // Sets the timestamp of the reading.
     public void setDate(Date date) {
         this.date = date;
     }
 
+    // Gets the device identifier.
     public String getDevice() {
         return device;
     }
 
+    // Sets the device identifier.
     public void setDevice(String device) {
         this.device = device;
     }
 
-    /**
-     * A helper method to convert the Date object to an Instant.
-     * This is useful for working with Java's modern date-time API (java.time).
-     * @return The date as an Instant, or null if the date is not set.
-     */
+    // Converts the Date object to an Instant.
     public Instant getDateAsInstant() {
         return date != null ? date.toInstant() : null;
     }

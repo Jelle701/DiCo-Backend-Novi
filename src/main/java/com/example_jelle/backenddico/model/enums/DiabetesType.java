@@ -1,8 +1,6 @@
+// Enum representing the different types of diabetes.
 package com.example_jelle.backenddico.model.enums;
 
-/**
- * This enum represents the different types of diabetes.
- */
 public enum DiabetesType {
     TYPE_1,
     TYPE_2,

@@ -1,3 +1,4 @@
+// Security configuration for the application.
 package com.example_jelle.backenddico.config;
 
 import com.example_jelle.backenddico.exception.CustomAccessDeniedHandler;
@@ -25,7 +26,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -38,16 +38,19 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
+    // Constructs a new SecurityConfig.
     public SecurityConfig(JwtUtil jwtUtil, CustomAccessDeniedHandler customAccessDeniedHandler) {
         this.jwtUtil = jwtUtil;
         this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
+    // Creates a PasswordEncoder bean.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Creates an AuthenticationManager bean.
     @Bean
     public AuthenticationManager authenticationManager(CustomUserDetailsService uds,
                                                        PasswordEncoder enc) {
@@ -57,6 +60,7 @@ public class SecurityConfig {
         return new ProviderManager(provider);
     }
 
+    // Configures the security filter chain.
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, CustomUserDetailsService userDetailsService) throws Exception {
         JwtRequestFilter jwtRequestFilter = new JwtRequestFilter(jwtUtil, userDetailsService);
@@ -65,19 +69,19 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // 1) Preflight eerst
+                        // Allow preflight requests.
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 2) Auth-endpoints volledig open
+                        // Allow all auth endpoints.
                         .requestMatchers("/auth/**").permitAll()
 
-                        // 3) (optioneel) health/docs open
+                        // Allow health and docs endpoints.
                         .requestMatchers("/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
-                        // 4) Alles van Libre moet ingelogd
+                        // Require authentication for LibreView endpoints.
                         .requestMatchers("/libre/**").authenticated()
 
-                        // 5) rest moet ingelogd
+                        // Require authentication for all other requests.
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -90,6 +94,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // Configures CORS.
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();

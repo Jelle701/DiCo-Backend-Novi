@@ -1,3 +1,4 @@
+// REST controller for patient-related operations.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.user.FullUserProfileDto;
@@ -20,10 +21,12 @@ public class PatientController {
 
     private final UserService userService;
 
+    // Constructs a new PatientController.
     public PatientController(UserService userService) {
         this.userService = userService;
     }
 
+    // Retrieves the full user profile for a patient.
     @GetMapping("/{username}/profile")
     @PreAuthorize("hasRole('PATIENT') or hasRole('PROVIDER') or hasRole('GUARDIAN')")
     public ResponseEntity<FullUserProfileDto> getPatientProfile(@PathVariable String username) {
@@ -31,6 +34,7 @@ public class PatientController {
         return ResponseEntity.ok(userProfile);
     }
 
+    // Generates a new access code for the authenticated patient.
     @PostMapping("/access-code/generate")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<AccessCodeDto> generateAccessCode(Authentication authentication) {
@@ -39,6 +43,7 @@ public class PatientController {
         return ResponseEntity.ok(new AccessCodeDto(newAccessCode));
     }
 
+    // Retrieves the active access code for the authenticated patient.
     @GetMapping("/access-code")
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<AccessCodeDto> getAccessCode(Authentication authentication) {

@@ -1,37 +1,110 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+################################################################################
+# OS junk
+################################################################################
+.DS_Store
+Thumbs.db
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+################################################################################
+# IDEs / Editors
+################################################################################
+# IntelliJ
+.idea/
 *.iml
-*.ipr
+out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code
 .vscode/
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+################################################################################
+# Java / Maven build output
+################################################################################
+target/
+dependency-reduced-pom.xml
+.mvn/timing.properties
+
+# Maven wrapper: deze BESTANDEN WEL committen
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+################################################################################
+# Test rapporten / coverage
+################################################################################
+surefire-reports/
+failsafe-reports/
+jacoco.exec
+target/site/jacoco/
+coverage/
+
+################################################################################
+# Logs & runtime dumps
+################################################################################
+*.log
+*.log.*
+spring.log
+hs_err_pid*
+replay_pid*
+*.hprof
+heapdump*.hprof
+
+################################################################################
+# Config & secrets
+################################################################################
+# Algemene env-bestanden
 .env
+*.env
+.env.*
 
-### Custom ###
+# Spring (hou een template bijv. application.example.properties)
+application-local.properties
+application-local.yml
+application-*.local.properties
+application-*.local.yml
+application-*.secrets.properties
+application-*.secrets.yml
 
+# (Optioneel, als je echte credentials in application.properties plaatst)
+# application.properties
+# application.yml
+
+################################################################################
+# Certificaten & sleutels
+################################################################################
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+keystore/*
+!keystore/README.md
+
+################################################################################
+# Database / dumps
+################################################################################
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.sql
+
+################################################################################
+# Docker / Compose overrides
+################################################################################
+docker/.env
+.env.docker
+docker-compose.override.yml
+
+################################################################################
+# Temp / tooling
+################################################################################
+.tmp/
+tmp/

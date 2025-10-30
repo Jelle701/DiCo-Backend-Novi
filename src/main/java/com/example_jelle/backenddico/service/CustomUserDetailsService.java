@@ -1,6 +1,7 @@
+// Custom implementation of Spring Security's UserDetailsService.
 package com.example_jelle.backenddico.service;
 
-import com.example_jelle.backenddico.model.Role;
+import com.example_jelle.backenddico.model.enums.Role;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.UserRepository;
 import com.example_jelle.backenddico.security.CustomUserDetails;
@@ -19,10 +20,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    // Constructs a new CustomUserDetailsService.
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
+    // Loads user-specific data by username (email).
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         String lowerCaseEmail = email.toLowerCase();

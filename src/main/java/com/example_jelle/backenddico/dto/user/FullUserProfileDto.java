@@ -1,7 +1,7 @@
 package com.example_jelle.backenddico.dto.user;
 
 import com.example_jelle.backenddico.dto.onboarding.DeviceDto;
-import com.example_jelle.backenddico.model.Role;
+import com.example_jelle.backenddico.model.enums.Role;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.model.UserFlags;
 import com.example_jelle.backenddico.model.UserProfile;

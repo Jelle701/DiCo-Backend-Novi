@@ -1,3 +1,4 @@
+// REST controller for user authentication and registration.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.payload.request.AuthenticationRequest;
@@ -29,6 +30,7 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
+    // Constructs a new AuthController.
     public AuthController(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, UserService userService, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
@@ -36,13 +38,13 @@ public class AuthController {
         this.jwtUtil = jwtUtil;
     }
 
+    // Authenticates a user and returns a JWT.
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthenticationRequest authenticationRequest) throws Exception {
         String username = authenticationRequest.getUsername().toLowerCase();
         String password = authenticationRequest.getPassword();
 
         logger.info("Received authentication request for username: {}", username);
-        logger.debug("Password for {}: {}", username, password); // Added for debugging, be careful in production
 
         try {
             authenticationManager.authenticate(
@@ -50,11 +52,10 @@ public class AuthController {
             );
         } catch (BadCredentialsException e) {
             logger.warn("Authentication failed for username: {}. Reason: {}", username, e.getMessage());
-            // Return 401 Unauthorized with a generic message to prevent user enumeration
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Ongeldige gebruikersnaam of wachtwoord."));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new MessageResponse("Invalid username or password."));
         } catch (Exception e) {
             logger.error("An unexpected error occurred during authentication for username: {}.", username, e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("Er is een interne serverfout opgetreden."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new MessageResponse("An internal server error occurred."));
         }
 
         logger.info("Authentication successful for username: {}", username);
@@ -66,6 +67,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Registers a new user.
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         logger.info("Received registration request for email: {}", registerRequest.getEmail());
@@ -75,6 +77,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // Verifies a user's account.
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser(@Valid @RequestBody VerifyRequest verifyRequest) {
         logger.info("Received verification request with token: {}", verifyRequest.getToken());

@@ -1,3 +1,4 @@
+// REST controller for managing access codes and granting access.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.access.GrantAccessRequestDto;
@@ -13,10 +14,12 @@ public class AccessController {
 
     private final AccessService accessService;
 
+    // Constructs a new AccessController.
     public AccessController(AccessService accessService) {
         this.accessService = accessService;
     }
 
+    // Grants access based on a provided access code.
     @PostMapping("/grant")
     public ResponseEntity<GrantAccessResponseDto> grantAccess(@Valid @RequestBody GrantAccessRequestDto request) {
         GrantAccessResponseDto response = accessService.grantAccess(request.getAccessCode());

@@ -1,3 +1,4 @@
+// Implementation of the UserService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.AdminUpdateUserDto;
@@ -12,6 +13,9 @@ import com.example_jelle.backenddico.exception.EmailAlreadyExists;
 import com.example_jelle.backenddico.exception.InvalidTokenException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
 import com.example_jelle.backenddico.model.*;
+import com.example_jelle.backenddico.model.enums.ActivityType;
+import com.example_jelle.backenddico.model.enums.Role;
+import com.example_jelle.backenddico.model.enums.ServiceName;
 import com.example_jelle.backenddico.payload.request.RegisterRequest;
 import com.example_jelle.backenddico.payload.request.VerifyRequest;
 import com.example_jelle.backenddico.repository.*;
@@ -41,6 +45,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final ActivityService activityService;
 
+    // Constructs a new UserServiceImpl.
     @Autowired
     public UserServiceImpl(UserRepository userRepository, UserProfileRepository userProfileRepository, AccessCodeRepository accessCodeRepository, UserDeviceRepository userDeviceRepository, UserServiceConnectionRepository connectionRepository, PasswordEncoder passwordEncoder, ActivityService activityService) {
         this.userRepository = userRepository;
@@ -52,6 +57,7 @@ public class UserServiceImpl implements UserService {
         this.activityService = activityService;
     }
 
+    // Registers a new user.
     @Override
     @Transactional
     public void register(RegisterRequest registerRequest) {
@@ -70,9 +76,10 @@ public class UserServiceImpl implements UserService {
         user.setVerificationCodeExpires(LocalDateTime.now().plusHours(24));
         logger.info("Generated verification code for {}: {}", user.getEmail(), verificationCode);
         userRepository.save(user);
-        activityService.createActivity(ActivityType.USER_REGISTRATION, "Nieuwe gebruiker '" + user.getEmail() + "' heeft zich geregistreerd.");
+        activityService.createActivity(ActivityType.USER_REGISTRATION, "New user '" + user.getEmail() + "' has registered.");
     }
 
+    // Verifies a user's account using a verification token.
     @Override
     @Transactional
     public void verifyUser(VerifyRequest verifyRequest) {
@@ -88,6 +95,7 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    // Saves or updates the profile details for a user.
     @Override
     @Transactional
     public void saveProfileDetails(String username, OnboardingRequestDto onboardingRequestDto) {
@@ -164,6 +172,7 @@ public class UserServiceImpl implements UserService {
         logger.info("User devices AFTER saving user entity for user {}: {}", username, user.getUserDevices());
     }
 
+    // Retrieves a comprehensive profile for a user.
     @Override
     @Transactional(readOnly = true)
     public FullUserProfileDto getFullUserProfile(String username) {
@@ -172,6 +181,7 @@ public class UserServiceImpl implements UserService {
         return new FullUserProfileDto(user);
     }
 
+    // Retrieves a list of all users.
     @Override
     public List<UserDto> getUsers() {
         return userRepository.findAll().stream()
@@ -179,11 +189,13 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    // Finds a user by their username.
     @Override
     public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    // Generates a new access code for a patient.
     @Override
     @Transactional
     public String generateAccessCode(String patientEmail) {
@@ -208,6 +220,7 @@ public class UserServiceImpl implements UserService {
         return code;
     }
 
+    // Retrieves the currently active access code for a patient.
     @Override
     public String getAccessCode(String patientEmail) {
         User user = userRepository.findByUsername(patientEmail)
@@ -221,6 +234,7 @@ public class UserServiceImpl implements UserService {
         return activeCodes.get(0).getCode();
     }
 
+    // Deletes a user and all associated data.
     @Override
     @Transactional
     public void deleteUser(String username) {
@@ -229,6 +243,7 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
+    // Retrieves a list of all users formatted for the admin dashboard.
     @Override
     @Transactional(readOnly = true)
     public List<AdminUserDto> getAllUsersForAdmin() {
@@ -237,6 +252,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    // Deletes a user by their ID, for admin purposes.
     @Override
     @Transactional
     public void deleteUserById(Long userId) {
@@ -251,6 +267,7 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
+    // Updates a user's details as an admin.
     @Override
     @Transactional
     public AdminUserDto updateUserAsAdmin(Long userId, AdminUpdateUserDto updateUserDto) {
@@ -286,6 +303,7 @@ public class UserServiceImpl implements UserService {
         return AdminUserDto.fromUser(updatedUser);
     }
 
+    // Retrieves the status of all external service connections for a user.
     @Override
     @Transactional(readOnly = true)
     public List<ServiceStatusDto> getServiceConnectionStatuses(User user) {
@@ -305,6 +323,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    // Converts a User to a UserDto.
     private UserDto fromUser(User user) {
         UserDto dto = new UserDto();
         dto.setId(user.getId());
@@ -314,6 +333,7 @@ public class UserServiceImpl implements UserService {
         return dto;
     }
 
+    // Retrieves a comprehensive profile for a user, ensuring all lazy-loaded collections are fetched.
     @Override
     @Transactional(readOnly = true)
     public FullUserProfileDto findByUsernameWithAllDetails(String username) {

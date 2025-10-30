@@ -1,3 +1,4 @@
+// REST controller for managing user profiles.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.user.LibreViewCredentialsRequest;
@@ -26,12 +27,14 @@ public class ProfileController {
     private final UserRepository userRepository;
     private final LibreViewAuthService libreViewAuthService;
 
+    // Constructs a new ProfileController.
     public ProfileController(UserService userService, UserRepository userRepository, LibreViewAuthService libreViewAuthService) {
         this.userService = userService;
         this.userRepository = userRepository;
         this.libreViewAuthService = libreViewAuthService;
     }
 
+    // Retrieves the profile of the currently authenticated user.
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<FullUserProfileDto> getMyProfile(Authentication authentication) {
@@ -41,6 +44,7 @@ public class ProfileController {
         return ResponseEntity.ok(userProfile);
     }
 
+    // Saves or updates the onboarding details for the authenticated user.
     @PutMapping({"/me", "/details"})
     @PreAuthorize("hasAnyRole('PATIENT', 'PROVIDER', 'GUARDIAN')")
     public ResponseEntity<FullUserProfileDto> saveOnboardingDetails(
@@ -52,6 +56,7 @@ public class ProfileController {
         return ResponseEntity.ok(updatedProfile);
     }
 
+    // Saves LibreView credentials for the authenticated user.
     @PutMapping("/me/services/libreview")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> saveLibreViewCredentials(Authentication authentication, @Valid @RequestBody LibreViewCredentialsRequest req) {

@@ -1,3 +1,4 @@
+// Implementation of the HealthDataService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
@@ -10,7 +11,6 @@ import com.example_jelle.backenddico.model.HealthData;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.HealthDataRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
-// import lombok.AllArgsConstructor; // Tijdelijk verwijderd
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -18,24 +18,21 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * This service implements the logic for saving and retrieving user health data.
- */
 @Service
-// @AllArgsConstructor // Tijdelijk verwijderd
 public class HealthDataServiceImpl implements HealthDataService {
 
     private final UserRepository userRepository;
     private final HealthDataRepository healthDataRepository;
     private final GlucoseMeasurementService glucoseMeasurementService;
 
-    // Handmatige constructor om Lombok te omzeilen
+    // Constructs a new HealthDataServiceImpl.
     public HealthDataServiceImpl(UserRepository userRepository, HealthDataRepository healthDataRepository, GlucoseMeasurementService glucoseMeasurementService) {
         this.userRepository = userRepository;
         this.healthDataRepository = healthDataRepository;
         this.glucoseMeasurementService = glucoseMeasurementService;
     }
 
+    // Saves health data for a user.
     @Override
     public void saveHealthData(String username, HealthDataRequest healthDataRequest) {
         User user = userRepository.findByUsername(username)
@@ -64,6 +61,7 @@ public class HealthDataServiceImpl implements HealthDataService {
         }
     }
 
+    // Retrieves a summary of health data for a user.
     @Override
     public HealthDataResponse getHealthDataSummary(String username) {
         User user = userRepository.findByUsername(username)

@@ -1,3 +1,4 @@
+// REST controller for managing medical profiles.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.model.MedicalProfile;
@@ -15,10 +16,12 @@ public class MedicalProfileController {
 
     private final MedicalProfileService service;
 
+    // Constructs a new MedicalProfileController.
     public MedicalProfileController(MedicalProfileService service) {
         this.service = service;
     }
 
+    // Creates or updates a medical profile for the authenticated user.
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MedicalProfile> createOrUpdate(@RequestBody MedicalProfile profile, Authentication authentication) {

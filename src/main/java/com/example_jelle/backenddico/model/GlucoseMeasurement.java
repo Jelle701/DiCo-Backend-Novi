@@ -1,5 +1,8 @@
+// Entity representing a single glucose measurement.
 package com.example_jelle.backenddico.model;
 
+import com.example_jelle.backenddico.model.enums.MeasurementSource;
+import com.example_jelle.backenddico.model.enums.MeasurementType;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -18,7 +21,7 @@ public class GlucoseMeasurement {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference // Add this annotation to break the infinite loop
+    @JsonBackReference // Breaks the infinite loop
     private User user;
 
     @Column(nullable = false)

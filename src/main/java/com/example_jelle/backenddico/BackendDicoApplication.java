@@ -1,3 +1,4 @@
+// Main application class for the Backend Dico project.
 package com.example_jelle.backenddico;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -9,6 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class BackendDicoApplication {
 
+    // Main method to run the Spring Boot application.
     public static void main(String[] args) {
         // Load the .env file from the project root
         Dotenv dotenv = Dotenv.load();

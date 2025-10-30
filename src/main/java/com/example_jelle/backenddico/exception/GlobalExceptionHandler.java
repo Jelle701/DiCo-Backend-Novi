@@ -1,3 +1,4 @@
+// Global exception handler for the application.
 package com.example_jelle.backenddico.exception;
 
 import com.example_jelle.backenddico.payload.response.MessageResponse;
@@ -21,18 +22,19 @@ public class GlobalExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // CSV and File Upload specific handlers
+    // Handles CsvValidationException.
     @ExceptionHandler(CsvValidationException.class)
     public ResponseEntity<Map<String, String>> handleCsvValidationException(CsvValidationException ex) {
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
     }
 
+    // Handles FileUploadException.
     @ExceptionHandler(FileUploadException.class)
     public ResponseEntity<Map<String, String>> handleFileUploadException(FileUploadException ex) {
         return ResponseEntity.badRequest().body(Map.of("message", ex.getMessage()));
     }
 
-    // General application exception handlers
+    // Handles SecurityException.
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<MessageResponse> handleSecurityException(SecurityException ex) {
         logger.warn("Security exception occurred, likely due to bad credentials for an external service: {}", ex.getMessage());
@@ -40,6 +42,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(messageResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    // Handles ResponseStatusException.
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<MessageResponse> handleResponseStatusException(ResponseStatusException ex) {
         logger.warn("Controller-level exception: {} - {}", ex.getStatusCode(), ex.getReason());
@@ -47,6 +50,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(messageResponse, ex.getStatusCode());
     }
 
+    // Handles AccessDeniedException.
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<MessageResponse> handleAccessDeniedException(AccessDeniedException ex, WebRequest request) {
         logger.warn("Access Denied: {}. Request: {}", ex.getMessage(), request.getDescription(false));
@@ -54,30 +58,35 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(messageResponse, HttpStatus.FORBIDDEN);
     }
 
+    // Handles UserNotFoundException.
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<MessageResponse> handleUserNotFoundException(UserNotFoundException ex, WebRequest request) {
         MessageResponse messageResponse = new MessageResponse(ex.getMessage());
         return new ResponseEntity<>(messageResponse, HttpStatus.NOT_FOUND);
     }
 
+    // Handles EmailAlreadyExists exception.
     @ExceptionHandler(EmailAlreadyExists.class)
     public ResponseEntity<MessageResponse> handleEmailAlreadyExistsException(EmailAlreadyExists ex, WebRequest request) {
         MessageResponse messageResponse = new MessageResponse(ex.getMessage());
         return new ResponseEntity<>(messageResponse, HttpStatus.CONFLICT);
     }
 
+    // Handles InvalidTokenException.
     @ExceptionHandler(InvalidTokenException.class)
     public ResponseEntity<MessageResponse> handleInvalidTokenException(InvalidTokenException ex, WebRequest request) {
         MessageResponse messageResponse = new MessageResponse(ex.getMessage());
         return new ResponseEntity<>(messageResponse, HttpStatus.BAD_REQUEST);
     }
 
+    // Handles UnauthorizedException.
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<MessageResponse> handleUnauthorizedException(UnauthorizedException ex, WebRequest request) {
         MessageResponse messageResponse = new MessageResponse(ex.getMessage());
         return new ResponseEntity<>(messageResponse, HttpStatus.UNAUTHORIZED);
     }
 
+    // Handles MethodArgumentNotValidException for validation errors.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -89,7 +98,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    // Catch-all handler MUST be last
+    // Catch-all handler for any other unexpected exceptions.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<MessageResponse> handleAllOtherExceptions(Exception ex, WebRequest request) {
         logger.error("An unexpected error occurred: {}", ex.getMessage(), ex);

@@ -1,22 +1,22 @@
-package com.example_jelle.backenddico.tasks;
+// Scheduled task for synchronizing data from LibreView.
+package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.libre.LluAuthResult;
 import com.example_jelle.backenddico.dto.libre.LluConnectionsResponse;
 import com.example_jelle.backenddico.dto.libre.LluGraphResponse;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.MeasurementSource;
-import com.example_jelle.backenddico.model.ServiceName;
+import com.example_jelle.backenddico.model.enums.MeasurementSource;
+import com.example_jelle.backenddico.model.enums.ServiceName;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.model.UserServiceConnection;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
 import com.example_jelle.backenddico.repository.UserServiceConnectionRepository;
-import com.example_jelle.backenddico.service.LibreViewAuthService;
-import com.example_jelle.backenddico.service.LibreViewDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.ZoneId;
@@ -34,6 +34,7 @@ public class LibreViewSyncTask {
     private final LibreViewDataService libreViewDataService;
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
 
+    // Constructs a new LibreViewSyncTask.
     public LibreViewSyncTask(UserServiceConnectionRepository connectionRepository,
                              LibreViewAuthService libreViewAuthService,
                              LibreViewDataService libreViewDataService,
@@ -44,6 +45,7 @@ public class LibreViewSyncTask {
         this.glucoseMeasurementRepository = glucoseMeasurementRepository;
     }
 
+    // Synchronizes LibreView data.
     @Scheduled(fixedRate = 300000) // Run every 5 minutes
     @Transactional
     public void syncLibreViewData() {
@@ -61,6 +63,12 @@ public class LibreViewSyncTask {
         for (UserServiceConnection connection : connectionsToSync) {
             User user = connection.getUser();
             try {
+                // Skip this connection if credentials are not set
+                if (!StringUtils.hasText(connection.getEmail()) || !StringUtils.hasText(connection.getPassword())) {
+                    logger.info("Skipping sync for user: {} because LibreView credentials are not set.", user.getUsername());
+                    continue;
+                }
+
                 logger.info("--- Processing connection for user: {} ---", user.getUsername());
 
                 // 1. Try to fetch data with the stored token.
@@ -113,6 +121,7 @@ public class LibreViewSyncTask {
         logger.info("LibreView data synchronization task finished.");
     }
 
+    // Fetches data with the stored token.
     private LluConnectionsResponse fetchDataWithToken(UserServiceConnection connection) {
         if (connection.getAccessToken() == null || connection.getExternalUserId() == null) {
             logger.warn("Cannot fetch data for user {}: token or externalUserId is null.", connection.getUser().getUsername());
@@ -130,6 +139,7 @@ public class LibreViewSyncTask {
         }
     }
 
+    // Saves the measurements.
     private int saveMeasurements(User user, LluGraphResponse graphData) {
         return Stream.of(graphData.data().measurement(), graphData.data().amperageMeasurements())
             .flatMap(list -> list == null ? Stream.empty() : list.stream())

@@ -1,7 +1,8 @@
+// Data Transfer Object for glucose measurement data.
 package com.example_jelle.backenddico.dto;
 
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.MeasurementSource;
+import com.example_jelle.backenddico.model.enums.MeasurementSource;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
@@ -20,16 +21,24 @@ public class GlucoseMeasurementDto {
 
     private MeasurementSource source;
 
-    // Getters and Setters
+    // Gets the ID of the glucose measurement.
     public Long getId() { return id; }
+    // Sets the ID of the glucose measurement.
     public void setId(Long id) { this.id = id; }
+    // Gets the glucose value.
     public Double getValue() { return value; }
+    // Sets the glucose value.
     public void setValue(Double value) { this.value = value; }
+    // Gets the timestamp of the measurement.
     public ZonedDateTime getTimestamp() { return timestamp; }
+    // Sets the timestamp of the measurement.
     public void setTimestamp(ZonedDateTime timestamp) { this.timestamp = timestamp; }
+    // Gets the source of the measurement.
     public MeasurementSource getSource() { return source; }
+    // Sets the source of the measurement.
     public void setSource(MeasurementSource source) { this.source = source; }
 
+    // Converts a GlucoseMeasurement entity to a GlucoseMeasurementDto.
     public static GlucoseMeasurementDto fromEntity(GlucoseMeasurement measurement) {
         GlucoseMeasurementDto dto = new GlucoseMeasurementDto();
         dto.setId(measurement.getId());
@@ -39,6 +48,7 @@ public class GlucoseMeasurementDto {
         return dto;
     }
 
+    // Converts the GlucoseMeasurementDto to a GlucoseMeasurement entity.
     public GlucoseMeasurement toEntity() {
         GlucoseMeasurement measurement = new GlucoseMeasurement();
         measurement.setValue(this.value);

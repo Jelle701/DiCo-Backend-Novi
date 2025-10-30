@@ -1,11 +1,12 @@
+// Service for synchronizing historical data from LibreView.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.libre.LluAuthResult;
 import com.example_jelle.backenddico.dto.libre.LluConnectionsResponse;
 import com.example_jelle.backenddico.dto.libre.LluGraphResponse;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.MeasurementSource;
-import com.example_jelle.backenddico.model.ServiceName;
+import com.example_jelle.backenddico.model.enums.MeasurementSource;
+import com.example_jelle.backenddico.model.enums.ServiceName;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.model.UserServiceConnection;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
@@ -17,11 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.stream.Stream;
 
 @Service
@@ -35,6 +34,7 @@ public class LibreViewSyncService {
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
     private final UserServiceConnectionRepository connectionRepository;
 
+    // Constructs a new LibreViewSyncService.
     public LibreViewSyncService(LibreViewAuthService libreViewAuthService, LibreViewDataService libreViewDataService, GlucoseMeasurementRepository glucoseMeasurementRepository, UserServiceConnectionRepository connectionRepository) {
         this.libreViewAuthService = libreViewAuthService;
         this.libreViewDataService = libreViewDataService;
@@ -42,6 +42,7 @@ public class LibreViewSyncService {
         this.connectionRepository = connectionRepository;
     }
 
+    // Imports historical data for a user.
     @Transactional
     public void importHistoricalDataForUser(User user) {
         logger.info("Starting historical data import for user: {}", user.getUsername());
@@ -94,6 +95,7 @@ public class LibreViewSyncService {
         logger.info("Finished historical data import for user: {}", user.getUsername());
     }
 
+    // Gets a valid token.
     private String getValidToken(UserServiceConnection connection) {
         try {
             libreViewDataService.getConnections(connection.getAccessToken(), connection.getExternalUserId());
@@ -109,6 +111,7 @@ public class LibreViewSyncService {
         }
     }
 
+    // Saves the measurements.
     private long saveMeasurements(User user, LluGraphResponse graphData) {
         return Stream.of(graphData.data().measurement(), graphData.data().amperageMeasurements())
                 .flatMap(list -> list == null ? Stream.empty() : list.stream())

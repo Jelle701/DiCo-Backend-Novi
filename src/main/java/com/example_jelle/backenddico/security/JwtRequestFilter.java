@@ -1,3 +1,4 @@
+// Filter that intercepts incoming requests to validate JWTs.
 package com.example_jelle.backenddico.security;
 
 import com.example_jelle.backenddico.service.CustomUserDetailsService;
@@ -16,12 +17,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-/**
- * This class is a filter that intercepts every incoming request once.
- * It is responsible for extracting the JWT from the Authorization header, validating it,
- * and setting the user's authentication in the Spring Security context if the token is valid.
- * IMPORTANT: This class should NOT be a @Component. It is manually instantiated in SecurityConfig.
- */
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
@@ -29,21 +24,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
 
+    // Constructs a new JwtRequestFilter.
     public JwtRequestFilter(JwtUtil jwtUtil, CustomUserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
     }
 
-    /**
-     * The main filter logic. It checks for a "Bearer " token in the Authorization header.
-     * If a token is found, it extracts the username and validates the token.
-     * If validation is successful, it creates an authentication token and sets it in the SecurityContextHolder.
-     * @param request The incoming HTTP request.
-     * @param response The HTTP response.
-     * @param chain The filter chain.
-     * @throws IOException if an I/O error occurs.
-     * @throws ServletException if a servlet error occurs.
-     */
+    // Filters incoming requests to validate JWTs and set authentication in the security context.
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -54,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
-        // Skip auth for public/auth endpoints and preflight
+        // Skip authentication for public/auth endpoints and preflight requests.
         if ("OPTIONS".equalsIgnoreCase(method)
             || uri.startsWith("/api/auth/")
             || uri.startsWith("/actuator/")) {
@@ -89,7 +76,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 }
             } catch (UsernameNotFoundException e) {
                 logger.warn("User '{}' from JWT token not found in database.", username);
-                // If user is not found, do nothing. The request will proceed without authentication.
             }
         }
 

@@ -1,4 +1,5 @@
-package com.example_jelle.backenddico.model;
+// Enum representing the source of a glucose measurement.
+package com.example_jelle.backenddico.model.enums;
 
 public enum MeasurementSource {
     LIBREVIEW,

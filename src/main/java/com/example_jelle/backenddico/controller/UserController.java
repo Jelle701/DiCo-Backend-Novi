@@ -1,3 +1,4 @@
+// REST controller for user-related operations.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.ServiceStatusDto;
@@ -21,11 +22,13 @@ public class UserController {
     private final UserService userService;
     private final UserRepository userRepository;
 
+    // Constructs a new UserController.
     public UserController(UserService userService, UserRepository userRepository) {
         this.userService = userService;
         this.userRepository = userRepository;
     }
 
+    // Retrieves the service connection statuses for the currently authenticated user.
     @GetMapping("/me/services")
     public ResponseEntity<List<ServiceStatusDto>> getMyServiceConnections(@AuthenticationPrincipal CustomUserDetails currentUser) {
         User user = userRepository.findById(currentUser.getId())

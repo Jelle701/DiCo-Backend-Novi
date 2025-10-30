@@ -1,3 +1,4 @@
+// Handles AccessDeniedExceptions thrown by Spring Security.
 package com.example_jelle.backenddico.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,16 +15,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * This component handles AccessDeniedExceptions thrown by Spring Security.
- * It ensures that when a user is authenticated but not authorized to access a resource,
- * a proper JSON error message is returned with a 403 FORBIDDEN status, instead of an empty body.
- */
 @Component
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // Handles access denied exceptions by returning a JSON error message with a 403 FORBIDDEN status.
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         response.setStatus(HttpStatus.FORBIDDEN.value());

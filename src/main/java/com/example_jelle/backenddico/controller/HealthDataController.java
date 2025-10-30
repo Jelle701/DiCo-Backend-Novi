@@ -1,3 +1,4 @@
+// REST controller for managing health data.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.health.HealthDataRequest;
@@ -15,10 +16,12 @@ public class HealthDataController {
 
     private final HealthDataService healthDataService;
 
+    // Constructs a new HealthDataController.
     public HealthDataController(HealthDataService healthDataService) {
         this.healthDataService = healthDataService;
     }
 
+    // Saves health data for the authenticated user.
     @PostMapping
     @PreAuthorize("hasRole('PATIENT')")
     public ResponseEntity<Void> saveHealthData(@AuthenticationPrincipal UserDetails userDetails, @RequestBody HealthDataRequest request) {
@@ -26,6 +29,7 @@ public class HealthDataController {
         return ResponseEntity.ok().build();
     }
 
+    // Retrieves health data summary for the authenticated user.
     @GetMapping
     @PreAuthorize("hasRole('PATIENT') or hasAuthority('SCOPE_read:dashboard')")
     public ResponseEntity<HealthDataResponse> getHealthData(@AuthenticationPrincipal UserDetails userDetails) {

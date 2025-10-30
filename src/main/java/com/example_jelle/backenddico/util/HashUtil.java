@@ -1,7 +1,6 @@
+// Utility class for providing hashing functionality.
 package com.example_jelle.backenddico.util;
-
 import org.springframework.stereotype.Component;
-
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,13 +8,7 @@ import java.security.NoSuchAlgorithmException;
 @Component
 public class HashUtil {
 
-    /**
-     * Calculates the SHA-256 hash of a given text.
-     * This is required by the LibreView API to generate the Account-Id header.
-     *
-     * @param text The input string to hash.
-     * @return The SHA-256 hashed string, represented in hexadecimal format.
-     */
+    // Calculates the SHA-256 hash for a given string.
     public String calculateSha256(String text) {
         if (text == null) {
             return null;
@@ -33,8 +26,8 @@ public class HashUtil {
             }
             return hexString.toString();
         } catch (NoSuchAlgorithmException e) {
-            // This should never happen as SHA-256 is a standard algorithm
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            // This should never happen as SHA-256 is a standard algoritthrow new RuntimeException("SHA-256 algorithm not found", e);
         }
+        return text;
     }
 }

@@ -1,3 +1,4 @@
+// Service for handling LibreView authentication.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.libre.LluAuthResult;
@@ -5,6 +6,7 @@ import com.example_jelle.backenddico.dto.libre.LluLoginRequest;
 import com.example_jelle.backenddico.dto.libre.LluLoginResponse;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.model.UserServiceConnection;
+import com.example_jelle.backenddico.model.enums.ServiceName;
 import com.example_jelle.backenddico.repository.UserServiceConnectionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,20 +28,22 @@ public class LibreViewAuthService {
     private final WebClient libreViewClient;
     private final UserServiceConnectionRepository connectionRepository;
 
+    // Constructs a new LibreViewAuthService.
     public LibreViewAuthService(WebClient libreViewClient, UserServiceConnectionRepository connectionRepository) {
         this.libreViewClient = libreViewClient;
         this.connectionRepository = connectionRepository;
     }
 
+    // Connects or updates a LibreView connection for a user.
     @Transactional
     public LluAuthResult connectOrUpdateLibreView(User user, String email, String password) {
         logger.info("Creating or updating LibreView connection for user: {}", user.getUsername());
 
-        UserServiceConnection connection = connectionRepository.findByUserAndServiceName(user, com.example_jelle.backenddico.model.ServiceName.LIBREVIEW)
+        UserServiceConnection connection = connectionRepository.findByUserAndServiceName(user, ServiceName.LIBREVIEW)
                 .orElse(new UserServiceConnection());
 
         connection.setUser(user);
-        connection.setServiceName(com.example_jelle.backenddico.model.ServiceName.LIBREVIEW);
+        connection.setServiceName(ServiceName.LIBREVIEW);
         connection.setEmail(email);
         connection.setPassword(password);
 
@@ -58,6 +62,7 @@ public class LibreViewAuthService {
         return authResult;
     }
 
+    // Re-authenticates and stores a new token for a connection.
     @Transactional
     public LluAuthResult reauthenticateAndStoreToken(UserServiceConnection connection) {
         logger.info("Re-authenticating with LibreView for user: {}", connection.getUser().getUsername());
@@ -73,6 +78,7 @@ public class LibreViewAuthService {
         return authResult;
     }
 
+    // Authenticates a user with LibreView.
     private LluAuthResult authenticate(String email, String password) {
         logger.info("Performing login for email: {}", email);
         LluLoginResponse loginResponse = performLogin(email, password);
@@ -95,6 +101,7 @@ public class LibreViewAuthService {
         }
     }
 
+    // Handles the consent flow.
     private LluAuthResult handleConsentFlow(LluLoginResponse loginResponse) {
         String consentType = Optional.ofNullable(loginResponse.data()).map(LluLoginResponse.LluData::step).map(LluLoginResponse.Step::type).filter(StringUtils::hasText).orElse("pp");
         String tempToken = Optional.ofNullable(loginResponse.data()).map(LluLoginResponse.LluData::authTicket).map(LluLoginResponse.AuthTicket::token).orElse(null);
@@ -116,6 +123,7 @@ public class LibreViewAuthService {
         return extractAuthResult(consentResponse, "consent");
     }
 
+    // Performs a login request to LibreView.
     private LluLoginResponse performLogin(String email, String password) {
         LluLoginRequest body = new LluLoginRequest(email, password);
         logger.info("Sending login request to LibreView: {}", body);
@@ -127,11 +135,13 @@ public class LibreViewAuthService {
         }
     }
 
+    // Performs a consent request to LibreView.
     private LluLoginResponse performConsent(String type, String tempToken) {
         logger.info("Sending consent request to LibreView for type: {}", type);
         return libreViewClient.post().uri("/llu/auth/continue/{type}", type).header(HttpHeaders.AUTHORIZATION, "Bearer " + tempToken).retrieve().bodyToMono(LluLoginResponse.class).block(Duration.ofSeconds(15));
     }
 
+    // Extracts the authentication result from a login or consent response.
     private LluAuthResult extractAuthResult(LluLoginResponse response, String context) {
         logger.info("Extracting auth result from {} response.", context);
         return Optional.ofNullable(response).map(LluLoginResponse::data).filter(data -> data.authTicket() != null && data.user() != null && data.user().id() != null).map(data -> {

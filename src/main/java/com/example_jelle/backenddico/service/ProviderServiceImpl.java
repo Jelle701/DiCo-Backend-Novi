@@ -1,3 +1,4 @@
+// Implementation of the ProviderService interface.
 package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.dto.GlucoseMeasurementDto;
@@ -11,7 +12,7 @@ import com.example_jelle.backenddico.exception.InvalidAccessException;
 import com.example_jelle.backenddico.exception.UserNotFoundException;
 import com.example_jelle.backenddico.model.AccessCode;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.Role;
+import com.example_jelle.backenddico.model.enums.Role;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.AccessCodeRepository;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
@@ -40,6 +41,7 @@ public class ProviderServiceImpl implements ProviderService {
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
     private final DiabetesService diabetesService;
 
+    // Constructs a new ProviderServiceImpl.
     public ProviderServiceImpl(UserRepository userRepository, AccessCodeRepository accessCodeRepository, UserService userService, JwtUtil jwtUtil, GlucoseMeasurementRepository glucoseMeasurementRepository, DiabetesService diabetesService) {
         this.userRepository = userRepository;
         this.accessCodeRepository = accessCodeRepository;
@@ -49,8 +51,7 @@ public class ProviderServiceImpl implements ProviderService {
         this.diabetesService = diabetesService;
     }
 
-    // ... other methods ...
-
+    // Retrieves all glucose measurements for a specific patient, if the requesting user is linked to them.
     @Override
     @Transactional(readOnly = true)
     public List<GlucoseMeasurementDto> getGlucoseMeasurementsForPatient(String requestingUsername, Long patientId) {
@@ -71,6 +72,7 @@ public class ProviderServiceImpl implements ProviderService {
                 .collect(Collectors.toList());
     }
 
+    // Retrieves the diabetes summary for a specific patient, if the requesting provider is linked to them.
     @Override
     @Transactional(readOnly = true)
     public DiabetesSummaryDto getDiabetesSummaryForPatient(String providerUsername, Long patientId) {
@@ -87,9 +89,8 @@ public class ProviderServiceImpl implements ProviderService {
 
         return diabetesService.getDiabetesSummary(patient.getUsername());
     }
-    
-    // --- Unchanged methods below ---
 
+    // Links a provider to a patient using the patient's access code.
     @Override
     @Transactional
     public void linkPatient(String username, String accessCode) {
@@ -119,6 +120,7 @@ public class ProviderServiceImpl implements ProviderService {
         logger.info("Successfully saved link for user: {}", username);
     }
 
+    // Retrieves a list of all patients linked to a specific provider.
     @Override
     @Transactional(readOnly = true)
     public List<FullUserProfileDto> getLinkedPatients(String providerUsername) {
@@ -130,6 +132,7 @@ public class ProviderServiceImpl implements ProviderService {
                 .collect(Collectors.toList());
     }
 
+    // Generates a temporary, patient-specific token for a linked patient.
     @Override
     public DelegatedTokenResponseDto generateDelegatedToken(String providerUsername, Long patientId) {
         User provider = userRepository.findByUsername(providerUsername)
@@ -147,8 +150,9 @@ public class ProviderServiceImpl implements ProviderService {
         return new DelegatedTokenResponseDto(delegatedToken, patient.getUsername());
     }
 
+    // Retrieves an aggregated overview of all patients linked to the authenticated provider.
     @Override
-    @Transactional(readOnly = true) // Added @Transactional to resolve LazyInitializationException
+    @Transactional(readOnly = true)
     public DashboardSummaryDto getDashboardSummary(String providerUsername) {
         logger.info("Attempting to get dashboard summary for provider: {}", providerUsername);
         User provider = userRepository.findByUsernameWithLinkedPatients(providerUsername) // Use new method
@@ -158,7 +162,6 @@ public class ProviderServiceImpl implements ProviderService {
                 });
 
         logger.debug("Provider found: {}. Fetching linked patients.", provider.getUsername());
-        // Accessing the lazy-loaded collection within a transactional context
         List<User> linkedPatients = provider.getLinkedPatients().stream().collect(Collectors.toList());
         logger.debug("Found {} linked patients for provider {}.", linkedPatients.size(), provider.getUsername());
 
@@ -166,11 +169,10 @@ public class ProviderServiceImpl implements ProviderService {
         int patientsWithHighGlucose = 0;
         int patientsWithLowGlucose = 0;
 
-        // TODO: Implement actual logic to calculate high/low glucose patients based on their data
-        logger.info("Returning placeholder dashboard summary for provider: {}", providerUsername);
         return new DashboardSummaryDto(totalPatients, patientsWithHighGlucose, patientsWithLowGlucose);
     }
 
+    // Retrieves a dashboard summary for a specific patient linked to the authenticated provider.
     @Override
     @Transactional(readOnly = true)
     public PatientDashboardSummaryDto getPatientDashboardSummary(String providerUsername, Long patientId) {

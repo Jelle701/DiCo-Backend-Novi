@@ -1,10 +1,11 @@
-package com.example_jelle.backenddico.services;
+// Service for processing and managing glucose data.
+package com.example_jelle.backenddico.service;
 
 import com.example_jelle.backenddico.exception.CsvValidationException;
 import com.example_jelle.backenddico.exception.FileUploadException;
 import com.example_jelle.backenddico.model.GlucoseMeasurement;
-import com.example_jelle.backenddico.model.MeasurementSource;
-import com.example_jelle.backenddico.model.Role;
+import com.example_jelle.backenddico.model.enums.MeasurementSource;
+import com.example_jelle.backenddico.model.enums.Role;
 import com.example_jelle.backenddico.model.User;
 import com.example_jelle.backenddico.repository.GlucoseMeasurementRepository;
 import com.example_jelle.backenddico.repository.UserRepository;
@@ -39,11 +40,13 @@ public class GlucoseDataService {
     private final GlucoseMeasurementRepository glucoseMeasurementRepository;
     private final UserRepository userRepository;
 
+    // Constructs a new GlucoseDataService.
     public GlucoseDataService(GlucoseMeasurementRepository glucoseMeasurementRepository, UserRepository userRepository) {
         this.glucoseMeasurementRepository = glucoseMeasurementRepository;
         this.userRepository = userRepository;
     }
 
+    // Processes a CSV file with glucose data.
     @Transactional
     public int processCsvFile(MultipartFile file) {
         validateFile(file);
@@ -51,10 +54,10 @@ public class GlucoseDataService {
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             User user = userRepository.findByUsername(authentication.getName())
-                    .orElseThrow(() -> new CsvValidationException("Gebruiker niet gevonden.")); // Should not happen if authenticated
+                    .orElseThrow(() -> new CsvValidationException("User not found.")); // Should not happen if authenticated
 
             if (user.getRole() != Role.PATIENT) {
-                throw new CsvValidationException("Alleen gebruikers met de rol PATIENT kunnen data uploaden.");
+                throw new CsvValidationException("Only users with the PATIENT role can upload data.");
             }
 
             CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
@@ -65,7 +68,7 @@ public class GlucoseDataService {
             CSVParser csvParser = new CSVParser(reader, csvFormat);
 
             if (!csvParser.getHeaderNames().containsAll(List.of("Datum", "Tijd", "Glucosewaarde (mmol/L)"))) {
-                throw new CsvValidationException("Incorrecte kolomkoppen in CSV. Verwacht: 'Datum,Tijd,Glucosewaarde (mmol/L)'.");
+                throw new CsvValidationException("Incorrect column headers in CSV. Expected: 'Datum,Tijd,Glucosewaarde (mmol/L)'.");
             }
 
             List<GlucoseMeasurement> measurements = new ArrayList<>();
@@ -74,32 +77,34 @@ public class GlucoseDataService {
             }
 
             if (measurements.isEmpty()) {
-                throw new CsvValidationException("Het CSV-bestand is leeg of bevat geen data.");
+                throw new CsvValidationException("The CSV file is empty or contains no data.");
             }
 
             glucoseMeasurementRepository.saveAll(measurements);
             return measurements.size();
 
         } catch (IOException e) {
-            throw new RuntimeException("Fout bij het lezen van het bestand: " + e.getMessage(), e);
+            throw new RuntimeException("Error reading the file: " + e.getMessage(), e);
         } catch (Exception e) {
             if (e instanceof CsvValidationException || e instanceof FileUploadException) {
                 throw e;
             }
-            throw new RuntimeException("Fout bij het parsen van het CSV-bestand: " + e.getMessage(), e);
+            throw new RuntimeException("Error parsing the CSV file: " + e.getMessage(), e);
         }
     }
 
+    // Validates the uploaded file.
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new FileUploadException("Geen bestand meegestuurd.");
+            throw new FileUploadException("No file was sent.");
         }
         String contentType = file.getContentType();
         if (contentType == null || !contentType.equals("text/csv")) {
-            throw new FileUploadException("Ongeldig bestandsformaat. Alleen .csv bestanden zijn toegestaan.");
+            throw new FileUploadException("Invalid file format. Only .csv files are allowed.");
         }
     }
 
+    // Parses a single record from the CSV file.
     private GlucoseMeasurement parseRecord(CSVRecord csvRecord, User user) {
         long rowNum = csvRecord.getRecordNumber();
         try {
@@ -112,7 +117,7 @@ public class GlucoseDataService {
             double value = Double.parseDouble(valueStr);
 
             if (value < 0) {
-                throw new CsvValidationException("Fout op rij " + rowNum + ": Glucosewaarde mag niet negatief zijn.");
+                throw new CsvValidationException("Error on row " + rowNum + ": Glucose value cannot be negative.");
             }
 
             ZonedDateTime timestamp = ZonedDateTime.of(date, time, ZoneId.systemDefault());
@@ -125,32 +130,27 @@ public class GlucoseDataService {
             return measurement;
 
         } catch (DateTimeParseException e) {
-            throw new CsvValidationException("Fout op rij " + rowNum + ": Ongeldig datum- of tijdformaat. Verwacht 'YYYY-MM-DD' en 'HH:mm'.");
+            throw new CsvValidationException("Error on row " + rowNum + ": Invalid date or time format. Expected 'YYYY-MM-DD' and 'HH:mm'.");
         } catch (NumberFormatException e) {
-            throw new CsvValidationException("Fout op rij " + rowNum + ": '" + csvRecord.get("Glucosewaarde (mmol/L)") + "' is geen geldige glucosewaarde.");
+            throw new CsvValidationException("Error on row " + rowNum + ": '" + csvRecord.get("Glucosewaarde (mmol/L)") + "' is not a valid glucose value.");
         } catch (IllegalArgumentException e) {
-            throw new CsvValidationException("Fout op rij " + rowNum + ": Een of meer kolommen ontbreken of zijn onjuist.");
+            throw new CsvValidationException("Error on row " + rowNum + ": One or more columns are missing or incorrect.");
         }
     }
 
+    // Deletes all glucose data for a user.
     @Transactional
     public void deleteDataForUser(Long userId) {
         logger.info("Executing deletion of all glucose data records for user ID: {}", userId);
         glucoseMeasurementRepository.deleteByUserId(userId);
     }
 
-    /**
-     * Retrieves all glucose measurements for a user based on their username.
-     * @param username The username (email) of the user.
-     * @return A list of all GlucoseMeasurement objects.
-     */
-    @Transactional(readOnly = true) // readOnly is more efficient for read operations
+    // Retrieves all glucose measurements for a user by their username.
+    @Transactional(readOnly = true)
     public List<GlucoseMeasurement> findAllByUsername(String username) {
-        // 1. Find the user based on the username
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 2. Retrieve all glucose data for the found user ID
         return glucoseMeasurementRepository.findAllByUserIdOrderByTimestampAsc(user.getId());
     }
 }

@@ -1,9 +1,10 @@
+// REST controller for diabetes-related data.
 package com.example_jelle.backenddico.controller;
 
 import com.example_jelle.backenddico.dto.diabetes.DiabetesSummaryDto;
 import com.example_jelle.backenddico.exception.DataNotFoundException;
 import com.example_jelle.backenddico.service.DiabetesService;
-import com.example_jelle.backenddico.service.ProviderService; // Import ProviderService
+import com.example_jelle.backenddico.service.ProviderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,13 +22,15 @@ import java.util.Map;
 public class DiabetesController {
 
     private final DiabetesService diabetesService;
-    private final ProviderService providerService; // Inject ProviderService
+    private final ProviderService providerService;
 
+    // Constructs a new DiabetesController.
     public DiabetesController(DiabetesService diabetesService, ProviderService providerService) {
         this.diabetesService = diabetesService;
         this.providerService = providerService;
     }
 
+    // Retrieves the diabetes summary for the authenticated user.
     @GetMapping("/summary")
     public ResponseEntity<DiabetesSummaryDto> getDiabetesSummary(Authentication authentication) {
         String username = authentication.getName();
@@ -35,14 +38,7 @@ public class DiabetesController {
         return ResponseEntity.ok(summary);
     }
 
-    /**
-     * Endpoint to retrieve the diabetes summary for a specific patient.
-     * Accessible by the patient themselves, or by a linked provider/guardian.
-     *
-     * @param patientId The ID of the patient.
-     * @param authentication The current authentication object.
-     * @return A response entity containing the patient's diabetes summary data.
-     */
+    // Retrieves the diabetes summary for a specific patient.
     @GetMapping("/summary/patient/{patientId}")
     @PreAuthorize("hasRole('PATIENT') and #patientId == authentication.principal.id or hasRole('PROVIDER') or hasRole('GUARDIAN')")
     public ResponseEntity<DiabetesSummaryDto> getDiabetesSummaryForPatient(
@@ -53,8 +49,9 @@ public class DiabetesController {
         return ResponseEntity.ok(summary);
     }
 
+    // Handles DataNotFoundException.
     @ExceptionHandler(DataNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleDataNotFoundException(DataNotFoundException ex) {
-        return new ResponseEntity<>(Map.of("message", "Geen samenvattingsgegevens beschikbaar voor deze gebruiker."), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(Map.of("message", "No summary data available for this user."), HttpStatus.NOT_FOUND);
     }
 }

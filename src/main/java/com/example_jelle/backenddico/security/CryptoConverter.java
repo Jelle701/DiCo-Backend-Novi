@@ -1,4 +1,5 @@
-package com.example_jelle.backenddico.security.crypto;
+// Converter for encrypting and decrypting sensitive string attributes in the database.
+package com.example_jelle.backenddico.security;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
@@ -18,6 +19,7 @@ public class CryptoConverter implements AttributeConverter<String, String> {
     private static final String ALGORITHM = "AES/ECB/PKCS5Padding";
     private final Key key;
 
+    // Constructs a new CryptoConverter with the provided secret key.
     public CryptoConverter(@Value("${dico.encryption.key}") String secret) {
         if (secret == null || secret.length() != 16) {
             throw new IllegalArgumentException("dico.encryption.key must be exactly 16 characters long for AES-128.");
@@ -25,6 +27,7 @@ public class CryptoConverter implements AttributeConverter<String, String> {
         this.key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "AES");
     }
 
+    // Encrypts the attribute before storing it in the database.
     @Override
     public String convertToDatabaseColumn(String attribute) {
         if (attribute == null) {
@@ -39,6 +42,7 @@ public class CryptoConverter implements AttributeConverter<String, String> {
         }
     }
 
+    // Decrypts the attribute after retrieving it from the database.
     @Override
     public String convertToEntityAttribute(String dbData) {
         if (dbData == null) {
